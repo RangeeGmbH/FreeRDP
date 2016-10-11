@@ -1,7 +1,9 @@
 /**
  * FreeRDP: A Remote Desktop Protocol Implementation
+ * Client Channels
  *
- * Copyright 2014 Marc-Andre Moreau <marcandre.moreau@gmail.com>
+ * Copyright 2016 Armin Novak <armin.novak@thincast.com>
+ * Copyright 2016 Thinast Technologies GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +18,13 @@
  * limitations under the License.
  */
 
-#ifndef FREERDP_PRIMITIVES_YUV_H
-#define FREERDP_PRIMITIVES_YUV_H
+#ifndef FREERDP_CORE_GRAPHICS_H
+#define FREERDP_CORE_GRAPHICS_H
 
-pstatus_t general_yCbCrToRGB_16s8u_P3AC4R(const INT16* pSrc[3], int srcStep, BYTE* pDst, int dstStep, const prim_size_t* roi);
+#include <freerdp/api.h>
+#include <freerdp/freerdp.h>
+#include <freerdp/graphics.h>
 
-void primitives_init_YUV(primitives_t* prims);
-void primitives_init_YUV_opt(primitives_t* prims);
-void primitives_deinit_YUV(primitives_t* prims);
+FREERDP_LOCAL void Bitmap_Free(rdpContext* context, rdpBitmap* bitmap);
 
-#endif /* FREERDP_PRIMITIVES_YUV_H */
+#endif /* FREERDP_CORE_GRAPHICS_H */
