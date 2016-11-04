@@ -275,7 +275,7 @@ static UINT dvcman_load_addin(IWTSVirtualChannelManager* pChannelMgr,
 		return pDVCPluginEntry((IDRDYNVC_ENTRY_POINTS*) &entryPoints);
 	}
 
-	return CHANNEL_RC_OK;
+	return ERROR_INVALID_FUNCTION;
 }
 
 static DVCMAN_CHANNEL* dvcman_channel_new(IWTSVirtualChannelManager*
@@ -611,8 +611,12 @@ static UINT dvcman_receive_channel_data_first(IWTSVirtualChannelManager*
 
 	if (!channel)
 	{
+		/**
+		 * Windows Server 2012 R2 can send some messages over Microsoft::Windows::RDS::Geometry::v08.01
+		 * even if the dynamic virtual channel wasn't registered on our side. Ignoring it works.
+		 */
 		WLog_ERR(TAG, "ChannelId %d not found!", ChannelId);
-		return ERROR_INTERNAL_ERROR;
+		return CHANNEL_RC_OK;
 	}
 
 	if (channel->dvc_data)
