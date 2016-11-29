@@ -337,6 +337,8 @@ RFX_CONTEXT* rfx_context_new(BOOL encoder)
 	context->quantization_encode = rfx_quantization_encode;
 	context->dwt_2d_decode = rfx_dwt_2d_decode;
 	context->dwt_2d_encode = rfx_dwt_2d_encode;
+	context->rlgr_decode = rfx_rlgr_decode;
+	context->rlgr_encode = rfx_rlgr_encode;
 	RFX_INIT_SIMD(context);
 	context->state = RFX_STATE_SEND_HEADERS;
 	return context;
@@ -1151,6 +1153,7 @@ BOOL rfx_process_message(RFX_CONTEXT* context, const BYTE* data,
 		UINT32 nbUpdateRects;
 		REGION16 clippingRects;
 		const RECTANGLE_16* updateRects;
+		const DWORD formatSize = GetBytesPerPixel(format);
 		region16_init(&clippingRects);
 
 		for (i = 0; i < message->numRects; i++)
@@ -1178,7 +1181,7 @@ BOOL rfx_process_message(RFX_CONTEXT* context, const BYTE* data,
 
 			for (j = 0; j < nbUpdateRects; j++)
 			{
-				UINT32 stride = 64 * GetBytesPerPixel(format);
+				UINT32 stride = 64 * formatSize;
 				UINT32 nXDst = updateRects[j].left;
 				UINT32 nYDst = updateRects[j].top;
 				UINT32 nXSrc = nXDst - updateRect.left;

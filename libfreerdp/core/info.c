@@ -45,7 +45,6 @@ static const char* const INFO_TYPE_LOGON_STRINGS[4] =
 
 BOOL rdp_compute_client_auto_reconnect_cookie(rdpRdp* rdp)
 {
-	WINPR_HMAC_CTX hmac;
 	BYTE ClientRandom[32];
 	BYTE AutoReconnectRandom[32];
 	ARC_SC_PRIVATE_PACKET* serverCookie;
@@ -70,11 +69,7 @@ BOOL rdp_compute_client_auto_reconnect_cookie(rdpRdp* rdp)
 
 	/* SecurityVerifier = HMAC_MD5(AutoReconnectRandom, ClientRandom) */
 
-	if (!winpr_HMAC_Init(&hmac, WINPR_MD_MD5, AutoReconnectRandom, 16))
-		return FALSE;
-	if (!winpr_HMAC_Update(&hmac, ClientRandom, 32))
-		return FALSE;
-	if (!winpr_HMAC_Final(&hmac, clientCookie->securityVerifier, 16))
+	if (!winpr_HMAC(WINPR_MD_MD5, AutoReconnectRandom, 16, ClientRandom, 32, clientCookie->securityVerifier, 16))
 		return FALSE;
 
 	return TRUE;
@@ -866,7 +861,7 @@ BOOL rdp_recv_logon_info_v1(rdpRdp* rdp, wStream* s, logon_info *info)
 	{
 		if ((cbDomain % 2) || cbDomain > 52)
 		{
-			WLog_ERR(TAG, "protocol error: invalid cbDomain value: %lu", cbDomain);
+			WLog_ERR(TAG, "protocol error: invalid cbDomain value: %lu", (unsigned long) cbDomain);
 			goto fail;
 		}
 		wstr = (WCHAR*) Stream_Pointer(s);
@@ -893,7 +888,7 @@ BOOL rdp_recv_logon_info_v1(rdpRdp* rdp, wStream* s, logon_info *info)
 	{
 		if ((cbUserName % 2) || cbUserName > 512)
 		{
-			WLog_ERR(TAG, "protocol error: invalid cbUserName value: %lu", cbUserName);
+			WLog_ERR(TAG, "protocol error: invalid cbUserName value: %lu", (unsigned long) cbUserName);
 			goto fail;
 		}
 		wstr = (WCHAR*) Stream_Pointer(s);
@@ -956,7 +951,7 @@ BOOL rdp_recv_logon_info_v2(rdpRdp* rdp, wStream* s, logon_info *info)
 	{
 		if ((cbDomain % 2) || cbDomain > 52)
 		{
-			WLog_ERR(TAG, "protocol error: invalid cbDomain value: %lu", cbDomain);
+			WLog_ERR(TAG, "protocol error: invalid cbDomain value: %lu", (unsigned long) cbDomain);
 			goto fail;
 		}
 		if (Stream_GetRemainingLength(s) < (size_t) cbDomain)
@@ -988,7 +983,7 @@ BOOL rdp_recv_logon_info_v2(rdpRdp* rdp, wStream* s, logon_info *info)
 	{
 		if ((cbUserName % 2) || cbUserName < 2 || cbUserName > 512)
 		{
-			WLog_ERR(TAG, "protocol error: invalid cbUserName value: %lu", cbUserName);
+			WLog_ERR(TAG, "protocol error: invalid cbUserName value: %lu", (unsigned long) cbUserName);
 			goto fail;
 		}
 		if (Stream_GetRemainingLength(s) < (size_t) cbUserName)
