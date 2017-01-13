@@ -80,13 +80,6 @@ static UINT gdi_ResetGraphics(RdpgfxClientContext* context,
 		if (!surface || !surface->outputMapped)
 			continue;
 
-		if (!freerdp_client_codecs_reset(surface->codecs, FREERDP_CODEC_ALL,
-		                                 surface->width, surface->height))
-		{
-			free(pSurfaceIds);
-			return ERROR_INTERNAL_ERROR;
-		}
-
 		region16_clear(&surface->invalidRegion);
 	}
 
@@ -257,8 +250,9 @@ static UINT gdi_SurfaceCommand_RemoteFX(rdpGdi* gdi,
 	if (!surface)
 		return ERROR_INTERNAL_ERROR;
 
-	if (!rfx_process_message(surface->codecs->rfx, cmd->data, cmd->format,
-	                         cmd->length,
+	rfx_context_set_pixel_format(surface->codecs->rfx, cmd->format);
+
+	if (!rfx_process_message(surface->codecs->rfx, cmd->data, cmd->length,
 	                         cmd->left, cmd->top,
 	                         surface->data, surface->format, surface->scanline,
 	                         surface->height, &surface->invalidRegion))
@@ -302,7 +296,7 @@ static UINT gdi_SurfaceCommand_ClearCodec(rdpGdi* gdi,
 
 	if (rc < 0)
 	{
-		WLog_ERR(TAG, "clear_decompress failure: %d", rc);
+		WLog_ERR(TAG, "clear_decompress failure: %"PRId32"", rc);
 		return ERROR_INTERNAL_ERROR;
 	}
 
@@ -398,7 +392,7 @@ static UINT gdi_SurfaceCommand_AVC420(rdpGdi* gdi,
 
 	if (rc < 0)
 	{
-		WLog_WARN(TAG, "avc420_decompress failure: %d, ignoring update.", status);
+		WLog_WARN(TAG, "avc420_decompress failure: %"PRIu32", ignoring update.", status);
 		return CHANNEL_RC_OK;
 	}
 
@@ -460,7 +454,7 @@ static UINT gdi_SurfaceCommand_AVC444(rdpGdi* gdi, RdpgfxClientContext* context,
 
 	if (rc < 0)
 	{
-		WLog_WARN(TAG, "avc444_decompress failure: %d, ignoring update.", status);
+		WLog_WARN(TAG, "avc444_decompress failure: %"PRIu32", ignoring update.", status);
 		return CHANNEL_RC_OK;
 	}
 
@@ -504,7 +498,7 @@ static UINT gdi_SurfaceCommand_Alpha(rdpGdi* gdi, RdpgfxClientContext* context,
 	if (!surface)
 		return ERROR_INTERNAL_ERROR;
 
-	WLog_WARN(TAG, "TODO gdi_SurfaceCommand_Alpha: status: %d", status);
+	WLog_WARN(TAG, "TODO gdi_SurfaceCommand_Alpha: status: %"PRIu32"", status);
 
 	/* fill with green for now to distinguish from the rest */
 	if (!freerdp_image_fill(surface->data, surface->format, surface->scanline,
@@ -551,7 +545,7 @@ static UINT gdi_SurfaceCommand_Progressive(rdpGdi* gdi,
 
 	if (rc < 0)
 	{
-		WLog_ERR(TAG, "progressive_create_surface_context failure: %d", rc);
+		WLog_ERR(TAG, "progressive_create_surface_context failure: %"PRId32"", rc);
 		return ERROR_INTERNAL_ERROR;
 	}
 
@@ -562,7 +556,7 @@ static UINT gdi_SurfaceCommand_Progressive(rdpGdi* gdi,
 
 	if (rc < 0)
 	{
-		WLog_ERR(TAG, "progressive_decompress failure: %d", rc);
+		WLog_ERR(TAG, "progressive_decompress failure: %"PRId32"", rc);
 		return ERROR_INTERNAL_ERROR;
 	}
 
@@ -597,12 +591,12 @@ static UINT gdi_SurfaceCommand(RdpgfxClientContext* context,
 		return ERROR_INVALID_PARAMETER;
 
 	WLog_Print(gdi->log, WLOG_TRACE,
-	           "surfaceId=%lu, codec=%lu, contextId=%lu, format=%s, "
-	           "left=%lu, top=%lu, right=%lu, bottom=%lu, width=%lu, height=%lu "
-	           "length=%lu, data=%p, extra=%p",
+	           "surfaceId=%"PRIu32", codec=%"PRIu32", contextId=%"PRIu32", format=%s, "
+	           "left=%"PRIu32", top=%"PRIu32", right=%"PRIu32", bottom=%"PRIu32", width=%"PRIu32", height=%"PRIu32" "
+	           "length=%"PRIu32", data=%p, extra=%p",
 	           cmd->surfaceId, cmd->codecId, cmd->contextId,
 	           GetColorFormatName(cmd->format), cmd->left, cmd->top, cmd->right,
-	           cmd->bottom, cmd->width, cmd->height, cmd->length, cmd->data, cmd->extra);
+	           cmd->bottom, cmd->width, cmd->height, cmd->length, (void*) cmd->data, (void*) cmd->extra);
 
 	switch (cmd->codecId)
 	{
@@ -639,11 +633,11 @@ static UINT gdi_SurfaceCommand(RdpgfxClientContext* context,
 			break;
 
 		case RDPGFX_CODECID_CAPROGRESSIVE_V2:
-			WLog_WARN(TAG, "SurfaceCommand %08X not implemented", cmd->codecId);
+			WLog_WARN(TAG, "SurfaceCommand 0x%08"PRIX32" not implemented", cmd->codecId);
 			break;
 
 		default:
-			WLog_WARN(TAG, "Invalid SurfaceCommand %08X", cmd->codecId);
+			WLog_WARN(TAG, "Invalid SurfaceCommand 0x%08"PRIX32"", cmd->codecId);
 			break;
 	}
 
@@ -676,19 +670,12 @@ static UINT gdi_CreateSurface(RdpgfxClientContext* context,
 	if (!surface)
 		return ERROR_INTERNAL_ERROR;
 
-	surface->codecs = codecs_new(gdi->context);
+	surface->codecs = gdi->context->codecs;
 
 	if (!surface->codecs)
 	{
 		free(surface);
 		return CHANNEL_RC_NO_MEMORY;
-	}
-
-	if (!freerdp_client_codecs_prepare(surface->codecs, FREERDP_CODEC_ALL,
-	                                   createSurface->width, createSurface->height))
-	{
-		free(surface);
-		return ERROR_INTERNAL_ERROR;
 	}
 
 	surface->surfaceId = createSurface->surfaceId;
@@ -752,7 +739,6 @@ static UINT gdi_DeleteSurface(RdpgfxClientContext* context,
 		progressive_delete_surface_context(codecs->progressive,
 		                                   deleteSurface->surfaceId);
 
-	codecs_free(codecs);
 	return CHANNEL_RC_OK;
 }
 
@@ -783,9 +769,7 @@ static UINT gdi_SolidFill(RdpgfxClientContext* context,
 	g = solidFill->fillPixel.G;
 	r = solidFill->fillPixel.R;
 	a = solidFill->fillPixel.XA;
-	color = GetColor(PIXEL_FORMAT_ARGB32, r, g, b, a);
-	color = ConvertColor(color, PIXEL_FORMAT_ARGB32, surface->format,
-	                     &gdi->palette);
+	color = GetColor(surface->format, r, g, b, a);
 
 	for (index = 0; index < solidFill->fillRectCount; index++)
 	{

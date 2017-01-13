@@ -600,7 +600,7 @@ static BOOL gdi_patblt(rdpContext* context, PATBLT_ORDER* patblt)
 			break;
 
 		default:
-			WLog_ERR(TAG,  "unimplemented brush style:%d", brush->style);
+			WLog_ERR(TAG,  "unimplemented brush style:%"PRIu32"", brush->style);
 			break;
 	}
 
@@ -698,7 +698,7 @@ static BOOL gdi_line_to(rdpContext* context, const LINE_TO_ORDER* lineTo)
 	HGDI_PEN hPen;
 	rdpGdi* gdi = context->gdi;
 
-	if (!gdi_decode_color(gdi, lineTo->backColor, &color, NULL))
+	if (!gdi_decode_color(gdi, lineTo->penColor, &color, NULL))
 		return FALSE;
 
 	if (!(hPen = gdi_CreatePen(lineTo->penStyle, lineTo->penWidth, color,
@@ -874,7 +874,7 @@ static BOOL gdi_mem3blt(rdpContext* context, MEM3BLT_ORDER* mem3blt)
 			break;
 
 		default:
-			WLog_ERR(TAG,  "Mem3Blt unimplemented brush style:%d", brush->style);
+			WLog_ERR(TAG,  "Mem3Blt unimplemented brush style:%"PRIu32"", brush->style);
 			break;
 	}
 
@@ -919,7 +919,7 @@ static BOOL gdi_frame_marker(rdpContext* context,
 BOOL gdi_surface_frame_marker(rdpContext* context,
                               const SURFACE_FRAME_MARKER* surfaceFrameMarker)
 {
-	WLog_Print(context->gdi->log, WLOG_DEBUG, "frameId %d frameAction %d",
+	WLog_Print(context->gdi->log, WLOG_DEBUG, "frameId %"PRIu32" frameAction %"PRIu32"",
 	           surfaceFrameMarker->frameId,
 	           surfaceFrameMarker->frameAction);
 
@@ -952,18 +952,15 @@ static BOOL gdi_surface_bits(rdpContext* context,
 
 	gdi = context->gdi;
 	WLog_Print(gdi->log, WLOG_DEBUG,
-	           "destLeft %d destTop %d destRight %d destBottom %d "
-	           "bpp %d codecID %d width %d height %d length %d",
+	           "destLeft %"PRIu32" destTop %"PRIu32" destRight %"PRIu32" destBottom %"PRIu32" "
+	           "bpp %"PRIu32" codecID %"PRIu32" width %"PRIu32" height %"PRIu32" length %"PRIu32"",
 	           cmd->destLeft, cmd->destTop, cmd->destRight, cmd->destBottom,
 	           cmd->bpp, cmd->codecID, cmd->width, cmd->height, cmd->bitmapDataLength);
 
 	switch (cmd->codecID)
 	{
 		case RDP_CODEC_ID_REMOTEFX:
-			format = PIXEL_FORMAT_BGRX32;
-
 			if (!rfx_process_message(context->codecs->rfx, cmd->bitmapData,
-			                         format,
 			                         cmd->bitmapDataLength,
 			                         cmd->destLeft, cmd->destTop,
 			                         gdi->primary_buffer, gdi->dstFormat,
@@ -988,7 +985,7 @@ static BOOL gdi_surface_bits(rdpContext* context,
 			break;
 
 		case RDP_CODEC_ID_NONE:
-			format = PIXEL_FORMAT_BGRX32;
+			format = gdi_get_pixel_format(cmd->bpp);
 
 			if (!freerdp_image_copy(gdi->primary_buffer, gdi->dstFormat, gdi->stride,
 			                        cmd->destLeft, cmd->destTop, cmd->width, cmd->height,
@@ -999,7 +996,7 @@ static BOOL gdi_surface_bits(rdpContext* context,
 			break;
 
 		default:
-			WLog_ERR(TAG, "Unsupported codecID %d", cmd->codecID);
+			WLog_ERR(TAG, "Unsupported codecID %"PRIu32"", cmd->codecID);
 			break;
 	}
 

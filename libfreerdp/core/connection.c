@@ -773,7 +773,7 @@ BOOL rdp_client_connect_auto_detect(rdpRdp* rdp, wStream* s)
 		{
 			if (channelId == rdp->mcs->messageChannelId)
 			{
-				UINT16 securityFlags;
+				UINT16 securityFlags = 0;
 
 				if (!rdp_read_security_header(s, &securityFlags))
 					return FALSE;
@@ -1000,7 +1000,7 @@ BOOL rdp_server_accept_nego(rdpRdp* rdp, wStream* s)
 			 (nego->RequestedProtocols & PROTOCOL_TLS) ? 1 : 0,
 			 (nego->RequestedProtocols == PROTOCOL_RDP) ? 1 : 0
 			);
-	WLog_INFO(TAG, "Server Security: NLA:%d TLS:%d RDP:%d",
+	WLog_INFO(TAG, "Server Security: NLA:%"PRId32" TLS:%"PRId32" RDP:%"PRId32"",
 			 settings->NlaSecurity, settings->TlsSecurity, settings->RdpSecurity);
 
 	if ((settings->NlaSecurity) && (nego->RequestedProtocols & PROTOCOL_NLA))

@@ -40,7 +40,7 @@ static UINT encomsp_read_header(wStream* s, ENCOMSP_ORDER_HEADER* header)
 {
 	if (Stream_GetRemainingLength(s) < ENCOMSP_ORDER_HEADER_SIZE)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -72,7 +72,7 @@ static UINT encomsp_read_unicode_string(wStream* s, ENCOMSP_UNICODE_STRING* str)
 
 	if (Stream_GetRemainingLength(s) < 2)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -80,13 +80,13 @@ static UINT encomsp_read_unicode_string(wStream* s, ENCOMSP_UNICODE_STRING* str)
 
 	if (str->cchString > 1024)
 	{
-		WLog_ERR(TAG, "cchString was %d but has to be < 1025!", str->cchString);
+		WLog_ERR(TAG, "cchString was %"PRIu16" but has to be < 1025!", str->cchString);
 		return ERROR_INVALID_DATA;
 	}
 
 	if (Stream_GetRemainingLength(s) < (size_t)(str->cchString * 2))
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -115,7 +115,7 @@ static UINT encomsp_virtual_channel_write(encomspPlugin* encomsp, wStream* s)
 		return ERROR_INVALID_HANDLE;
 
 #if 0
-	WLog_INFO(TAG, "EncomspWrite (%d)", Stream_Length(s));
+	WLog_INFO(TAG, "EncomspWrite (%"PRIuz")", Stream_Length(s));
 	winpr_HexDump(Stream_Buffer(s), Stream_Length(s));
 #endif
 	status = encomsp->channelEntryPoints.pVirtualChannelWriteEx(encomsp->InitHandle,
@@ -123,7 +123,7 @@ static UINT encomsp_virtual_channel_write(encomspPlugin* encomsp, wStream* s)
 	         Stream_Buffer(s), (UINT32) Stream_Length(s), s);
 
 	if (status != CHANNEL_RC_OK)
-		WLog_ERR(TAG,  "VirtualChannelWriteEx failed with %s [%08X]",
+		WLog_ERR(TAG,  "VirtualChannelWriteEx failed with %s [%08"PRIX32"]",
 		         WTSErrorToString(status), status);
 
 	return status;
@@ -151,7 +151,7 @@ static UINT encomsp_recv_filter_updated_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if (Stream_GetRemainingLength(s) < 1)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -160,7 +160,7 @@ static UINT encomsp_recv_filter_updated_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -168,7 +168,7 @@ static UINT encomsp_recv_filter_updated_pdu(encomspPlugin* encomsp, wStream* s,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -178,7 +178,7 @@ static UINT encomsp_recv_filter_updated_pdu(encomspPlugin* encomsp, wStream* s,
 	IFCALLRET(context->FilterUpdated, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->FilterUpdated failed with error %u", error);
+		WLog_ERR(TAG, "context->FilterUpdated failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -205,7 +205,7 @@ static UINT encomsp_recv_application_created_pdu(encomspPlugin* encomsp,
 
 	if (Stream_GetRemainingLength(s) < 6)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -214,7 +214,7 @@ static UINT encomsp_recv_application_created_pdu(encomspPlugin* encomsp,
 
 	if ((error = encomsp_read_unicode_string(s, &(pdu.Name))))
 	{
-		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %u", error);
+		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %"PRIu32"", error);
 		return error;
 	}
 
@@ -222,7 +222,7 @@ static UINT encomsp_recv_application_created_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -230,7 +230,7 @@ static UINT encomsp_recv_application_created_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -240,7 +240,7 @@ static UINT encomsp_recv_application_created_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->ApplicationCreated, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ApplicationCreated failed with error %u", error);
+		WLog_ERR(TAG, "context->ApplicationCreated failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -267,7 +267,7 @@ static UINT encomsp_recv_application_removed_pdu(encomspPlugin* encomsp,
 
 	if (Stream_GetRemainingLength(s) < 4)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -276,7 +276,7 @@ static UINT encomsp_recv_application_removed_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -284,7 +284,7 @@ static UINT encomsp_recv_application_removed_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -294,7 +294,7 @@ static UINT encomsp_recv_application_removed_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->ApplicationRemoved, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ApplicationRemoved failed with error %u", error);
+		WLog_ERR(TAG, "context->ApplicationRemoved failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -321,7 +321,7 @@ static UINT encomsp_recv_window_created_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if (Stream_GetRemainingLength(s) < 10)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -331,7 +331,7 @@ static UINT encomsp_recv_window_created_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if ((error = encomsp_read_unicode_string(s, &(pdu.Name))))
 	{
-		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %u", error);
+		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %"PRIu32"", error);
 		return error;
 	}
 
@@ -339,7 +339,7 @@ static UINT encomsp_recv_window_created_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -347,7 +347,7 @@ static UINT encomsp_recv_window_created_pdu(encomspPlugin* encomsp, wStream* s,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -357,7 +357,7 @@ static UINT encomsp_recv_window_created_pdu(encomspPlugin* encomsp, wStream* s,
 	IFCALLRET(context->WindowCreated, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->WindowCreated failed with error %u", error);
+		WLog_ERR(TAG, "context->WindowCreated failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -384,7 +384,7 @@ static UINT encomsp_recv_window_removed_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if (Stream_GetRemainingLength(s) < 4)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -393,7 +393,7 @@ static UINT encomsp_recv_window_removed_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -401,7 +401,7 @@ static UINT encomsp_recv_window_removed_pdu(encomspPlugin* encomsp, wStream* s,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -411,7 +411,7 @@ static UINT encomsp_recv_window_removed_pdu(encomspPlugin* encomsp, wStream* s,
 	IFCALLRET(context->WindowRemoved, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->WindowRemoved failed with error %u", error);
+		WLog_ERR(TAG, "context->WindowRemoved failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -438,7 +438,7 @@ static UINT encomsp_recv_show_window_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if (Stream_GetRemainingLength(s) < 4)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -447,7 +447,7 @@ static UINT encomsp_recv_show_window_pdu(encomspPlugin* encomsp, wStream* s,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -455,7 +455,7 @@ static UINT encomsp_recv_show_window_pdu(encomspPlugin* encomsp, wStream* s,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -465,7 +465,7 @@ static UINT encomsp_recv_show_window_pdu(encomspPlugin* encomsp, wStream* s,
 	IFCALLRET(context->ShowWindow, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ShowWindow failed with error %u", error);
+		WLog_ERR(TAG, "context->ShowWindow failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -492,7 +492,7 @@ static UINT encomsp_recv_participant_created_pdu(encomspPlugin* encomsp,
 
 	if (Stream_GetRemainingLength(s) < 10)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -502,7 +502,7 @@ static UINT encomsp_recv_participant_created_pdu(encomspPlugin* encomsp,
 
 	if ((error = encomsp_read_unicode_string(s, &(pdu.FriendlyName))))
 	{
-		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %u", error);
+		WLog_ERR(TAG, "encomsp_read_unicode_string failed with error %"PRIu32"", error);
 		return error;
 	}
 
@@ -510,7 +510,7 @@ static UINT encomsp_recv_participant_created_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -518,7 +518,7 @@ static UINT encomsp_recv_participant_created_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -528,7 +528,7 @@ static UINT encomsp_recv_participant_created_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->ParticipantCreated, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ParticipantCreated failed with error %u", error);
+		WLog_ERR(TAG, "context->ParticipantCreated failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -555,7 +555,7 @@ static UINT encomsp_recv_participant_removed_pdu(encomspPlugin* encomsp,
 
 	if (Stream_GetRemainingLength(s) < 12)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -566,7 +566,7 @@ static UINT encomsp_recv_participant_removed_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -574,7 +574,7 @@ static UINT encomsp_recv_participant_removed_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -584,7 +584,7 @@ static UINT encomsp_recv_participant_removed_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->ParticipantRemoved, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ParticipantRemoved failed with error %u", error);
+		WLog_ERR(TAG, "context->ParticipantRemoved failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -611,7 +611,7 @@ static UINT encomsp_recv_change_participant_control_level_pdu(
 
 	if (Stream_GetRemainingLength(s) < 6)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -621,7 +621,7 @@ static UINT encomsp_recv_change_participant_control_level_pdu(
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -629,7 +629,7 @@ static UINT encomsp_recv_change_participant_control_level_pdu(
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -639,7 +639,7 @@ static UINT encomsp_recv_change_participant_control_level_pdu(
 	IFCALLRET(context->ChangeParticipantControlLevel, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->ChangeParticipantControlLevel failed with error %u",
+		WLog_ERR(TAG, "context->ChangeParticipantControlLevel failed with error %"PRIu32"",
 		         error);
 
 	return error;
@@ -670,7 +670,7 @@ static UINT encomsp_send_change_participant_control_level_pdu(
 
 	if ((error = encomsp_write_header(s, (ENCOMSP_ORDER_HEADER*) pdu)))
 	{
-		WLog_ERR(TAG, "encomsp_write_header failed with error %u!", error);
+		WLog_ERR(TAG, "encomsp_write_header failed with error %"PRIu32"!", error);
 		return error;
 	}
 
@@ -703,7 +703,7 @@ static UINT encomsp_recv_graphics_stream_paused_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -711,7 +711,7 @@ static UINT encomsp_recv_graphics_stream_paused_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -721,7 +721,7 @@ static UINT encomsp_recv_graphics_stream_paused_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->GraphicsStreamPaused, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->GraphicsStreamPaused failed with error %u", error);
+		WLog_ERR(TAG, "context->GraphicsStreamPaused failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -749,7 +749,7 @@ static UINT encomsp_recv_graphics_stream_resumed_pdu(encomspPlugin* encomsp,
 
 	if ((beg + header->Length) < end)
 	{
-		WLog_ERR(TAG, "Not enought data!");
+		WLog_ERR(TAG, "Not enough data!");
 		return ERROR_INVALID_DATA;
 	}
 
@@ -757,7 +757,7 @@ static UINT encomsp_recv_graphics_stream_resumed_pdu(encomspPlugin* encomsp,
 	{
 		if (Stream_GetRemainingLength(s) < (size_t)((beg + header->Length) - end))
 		{
-			WLog_ERR(TAG, "Not enought data!");
+			WLog_ERR(TAG, "Not enough data!");
 			return ERROR_INVALID_DATA;
 		}
 
@@ -767,7 +767,7 @@ static UINT encomsp_recv_graphics_stream_resumed_pdu(encomspPlugin* encomsp,
 	IFCALLRET(context->GraphicsStreamResumed, error, context, &pdu);
 
 	if (error)
-		WLog_ERR(TAG, "context->GraphicsStreamResumed failed with error %u", error);
+		WLog_ERR(TAG, "context->GraphicsStreamResumed failed with error %"PRIu32"", error);
 
 	return error;
 }
@@ -786,18 +786,18 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 	{
 		if ((error = encomsp_read_header(s, &header)))
 		{
-			WLog_ERR(TAG, "encomsp_read_header failed with error %u!", error);
+			WLog_ERR(TAG, "encomsp_read_header failed with error %"PRIu32"!", error);
 			return error;
 		}
 
-		//WLog_DBG(TAG, "EncomspReceive: Type: %d Length: %d", header.Type, header.Length);
+		//WLog_DBG(TAG, "EncomspReceive: Type: %"PRIu16" Length: %"PRIu16"", header.Type, header.Length);
 
 		switch (header.Type)
 		{
 			case ODTYPE_FILTER_STATE_UPDATED:
 				if ((error = encomsp_recv_filter_updated_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_filter_updated_pdu failed with error %u!", error);
+					WLog_ERR(TAG, "encomsp_recv_filter_updated_pdu failed with error %"PRIu32"!", error);
 					return error;
 				}
 
@@ -806,7 +806,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_APP_REMOVED:
 				if ((error = encomsp_recv_application_removed_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_application_removed_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_application_removed_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -816,7 +816,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_APP_CREATED:
 				if ((error = encomsp_recv_application_created_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_application_removed_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_application_removed_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -826,7 +826,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_WND_REMOVED:
 				if ((error = encomsp_recv_window_removed_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_window_removed_pdu failed with error %u!", error);
+					WLog_ERR(TAG, "encomsp_recv_window_removed_pdu failed with error %"PRIu32"!", error);
 					return error;
 				}
 
@@ -835,7 +835,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_WND_CREATED:
 				if ((error = encomsp_recv_window_created_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_window_created_pdu failed with error %u!", error);
+					WLog_ERR(TAG, "encomsp_recv_window_created_pdu failed with error %"PRIu32"!", error);
 					return error;
 				}
 
@@ -844,7 +844,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_WND_SHOW:
 				if ((error = encomsp_recv_show_window_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_show_window_pdu failed with error %u!", error);
+					WLog_ERR(TAG, "encomsp_recv_show_window_pdu failed with error %"PRIu32"!", error);
 					return error;
 				}
 
@@ -853,7 +853,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_PARTICIPANT_REMOVED:
 				if ((error = encomsp_recv_participant_removed_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_participant_removed_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_participant_removed_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -863,7 +863,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_PARTICIPANT_CREATED:
 				if ((error = encomsp_recv_participant_created_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_participant_created_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_participant_created_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -875,7 +875,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 				             &header)))
 				{
 					WLog_ERR(TAG,
-					         "encomsp_recv_change_participant_control_level_pdu failed with error %u!",
+					         "encomsp_recv_change_participant_control_level_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -885,7 +885,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_GRAPHICS_STREAM_PAUSED:
 				if ((error = encomsp_recv_graphics_stream_paused_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_graphics_stream_paused_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_graphics_stream_paused_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -895,7 +895,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 			case ODTYPE_GRAPHICS_STREAM_RESUMED:
 				if ((error = encomsp_recv_graphics_stream_resumed_pdu(encomsp, s, &header)))
 				{
-					WLog_ERR(TAG, "encomsp_recv_graphics_stream_resumed_pdu failed with error %u!",
+					WLog_ERR(TAG, "encomsp_recv_graphics_stream_resumed_pdu failed with error %"PRIu32"!",
 					         error);
 					return error;
 				}
@@ -903,7 +903,7 @@ static UINT encomsp_process_receive(encomspPlugin* encomsp, wStream* s)
 				break;
 
 			default:
-				WLog_ERR(TAG, "header.Type %d not found", header.Type);
+				WLog_ERR(TAG, "header.Type %"PRIu16" not found", header.Type);
 				return ERROR_INVALID_DATA;
 				break;
 		}
@@ -934,7 +934,7 @@ static int encomsp_send(encomspPlugin* encomsp, wStream* s)
 	if (status != CHANNEL_RC_OK)
 	{
 		Stream_Free(s, TRUE);
-		WLog_ERR(TAG,  "VirtualChannelWriteEx failed with %s [%08X]",
+		WLog_ERR(TAG,  "VirtualChannelWriteEx failed with %s [%08"PRIX32"]",
 		         WTSErrorToString(status), status);
 	}
 
@@ -1019,7 +1019,7 @@ static VOID VCAPITYPE encomsp_virtual_channel_open_event_ex(LPVOID lpUserParam, 
 			if ((error = encomsp_virtual_channel_event_data_received(encomsp, pData,
 			             dataLength, totalLength, dataFlags)))
 				WLog_ERR(TAG,
-				         "encomsp_virtual_channel_event_data_received failed with error %u", error);
+				         "encomsp_virtual_channel_event_data_received failed with error %"PRIu32"", error);
 
 			break;
 
@@ -1070,7 +1070,7 @@ static void* encomsp_virtual_channel_client_thread(void* arg)
 
 			if ((error = encomsp_process_receive(encomsp, data)))
 			{
-				WLog_ERR(TAG, "encomsp_process_receive failed with error %u!", error);
+				WLog_ERR(TAG, "encomsp_process_receive failed with error %"PRIu32"!", error);
 				break;
 			}
 		}
@@ -1099,7 +1099,7 @@ static UINT encomsp_virtual_channel_event_connected(encomspPlugin* encomsp,
 
 	if (status != CHANNEL_RC_OK)
 	{
-		WLog_ERR(TAG, "pVirtualChannelOpen failed with %s [%08X]",
+		WLog_ERR(TAG, "pVirtualChannelOpen failed with %s [%08"PRIX32"]",
 		         WTSErrorToString(status), status);
 		return status;
 	}
@@ -1137,7 +1137,7 @@ static UINT encomsp_virtual_channel_event_disconnected(encomspPlugin* encomsp)
 	    && (WaitForSingleObject(encomsp->thread, INFINITE) == WAIT_FAILED))
 	{
 		rc = GetLastError();
-		WLog_ERR(TAG, "WaitForSingleObject failed with error %u", rc);
+		WLog_ERR(TAG, "WaitForSingleObject failed with error %"PRIu32"", rc);
 		return rc;
 	}
 
@@ -1149,7 +1149,7 @@ static UINT encomsp_virtual_channel_event_disconnected(encomspPlugin* encomsp)
 
 	if (CHANNEL_RC_OK != rc)
 	{
-		WLog_ERR(TAG, "pVirtualChannelClose failed with %s [%08X]",
+		WLog_ERR(TAG, "pVirtualChannelClose failed with %s [%08"PRIX32"]",
 		         WTSErrorToString(rc), rc);
 		return rc;
 	}
@@ -1195,7 +1195,7 @@ static VOID VCAPITYPE encomsp_virtual_channel_init_event_ex(LPVOID lpUserParam, 
 		case CHANNEL_EVENT_CONNECTED:
 			if ((error = encomsp_virtual_channel_event_connected(encomsp, pData,
 			             dataLength)))
-				WLog_ERR(TAG, "encomsp_virtual_channel_event_connected failed with error %u",
+				WLog_ERR(TAG, "encomsp_virtual_channel_event_connected failed with error %"PRIu32"",
 				         error);
 
 			break;
@@ -1203,7 +1203,7 @@ static VOID VCAPITYPE encomsp_virtual_channel_init_event_ex(LPVOID lpUserParam, 
 		case CHANNEL_EVENT_DISCONNECTED:
 			if ((error = encomsp_virtual_channel_event_disconnected(encomsp)))
 				WLog_ERR(TAG,
-				         "encomsp_virtual_channel_event_disconnected failed with error %u", error);
+				         "encomsp_virtual_channel_event_disconnected failed with error %"PRIu32"", error);
 
 			break;
 
@@ -1212,7 +1212,7 @@ static VOID VCAPITYPE encomsp_virtual_channel_init_event_ex(LPVOID lpUserParam, 
 			break;
 
 		default:
-			WLog_ERR(TAG, "Unhandled event type %d", event);
+			WLog_ERR(TAG, "Unhandled event type %"PRIu32"", event);
 	}
 
 	if (error && encomsp->rdpcontext)
@@ -1283,7 +1283,7 @@ BOOL VCAPITYPE VirtualChannelEntryEx(PCHANNEL_ENTRY_POINTS_EX pEntryPoints, PVOI
 
 	if (CHANNEL_RC_OK != rc)
 	{
-		WLog_ERR(TAG, "failed with %s [%08X]",
+		WLog_ERR(TAG, "failed with %s [%08"PRIX32"]",
 		         WTSErrorToString(rc), rc);
 		goto error_out;
 	}

@@ -1410,19 +1410,16 @@ static BOOL xf_auto_reconnect(freerdp* instance)
 	while (TRUE)
 	{
 		/* Quit retrying if max retries has been exceeded */
-		if (numRetries++ >= maxRetries)
+		if ((maxRetries > 0) && (numRetries++ >= maxRetries))
 		{
 			return FALSE;
 		}
 
 		/* Attempt the next reconnect */
-		WLog_INFO(TAG, "Attempting reconnect (%u of %u)", numRetries, maxRetries);
+		WLog_INFO(TAG, "Attempting reconnect (%"PRIu32" of %"PRIu32")", numRetries, maxRetries);
 
 		if (freerdp_reconnect(instance))
-		{
-			freerdp_abort_connect(instance);
 			return TRUE;
-		}
 
 		sleep(5);
 	}
@@ -1461,7 +1458,7 @@ static void* xf_client_thread(void* param)
 	/* --authonly ? */
 	if (instance->settings->AuthenticationOnly)
 	{
-		WLog_ERR(TAG, "Authentication only, exit status %d", !status);
+		WLog_ERR(TAG, "Authentication only, exit status %"PRId32"", !status);
 
 		if (!status)
 		{
@@ -1479,7 +1476,7 @@ static void* xf_client_thread(void* param)
 
 	if (!status)
 	{
-		WLog_ERR(TAG, "Freerdp connect error exit status %d", !status);
+		WLog_ERR(TAG, "Freerdp connect error exit status %"PRId32"", !status);
 		exit_code = freerdp_error_info(instance);
 
 		if (freerdp_get_last_error(instance->context) ==
@@ -1513,10 +1510,10 @@ static void* xf_client_thread(void* param)
 	while (!freerdp_shall_disconnect(instance))
 	{
 		/*
-		     * win8 and server 2k12 seem to have some timing issue/race condition
-		     * when a initial sync request is send to sync the keyboard indicators
-		     * sending the sync event twice fixed this problem
-		     */
+			 * win8 and server 2k12 seem to have some timing issue/race condition
+			 * when a initial sync request is send to sync the keyboard indicators
+			 * sending the sync event twice fixed this problem
+			 */
 		if (freerdp_focus_required(instance))
 		{
 			xf_keyboard_focus_in(xfc);

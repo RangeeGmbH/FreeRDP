@@ -168,6 +168,7 @@ static COMMAND_LINE_ARGUMENT_A args[] =
 	{ "play-rfx", COMMAND_LINE_VALUE_REQUIRED, "<pcap file>", NULL, NULL, -1, NULL, "Replay rfx pcap file" },
 	{ "auth-only", COMMAND_LINE_VALUE_BOOL, NULL, BoolValueFalse, NULL, -1, NULL, "Authenticate only." },
 	{ "auto-reconnect", COMMAND_LINE_VALUE_BOOL, NULL, BoolValueFalse, NULL, -1, NULL, "Automatic reconnection" },
+	{ "auto-reconnect-max-retries", COMMAND_LINE_VALUE_REQUIRED, "<retries>", NULL, NULL, -1, NULL, "Automatic reconnection maximum retries, 0 for unlimited [0,1000]" },
 	{ "reconnect-cookie", COMMAND_LINE_VALUE_REQUIRED, "<base64 cookie>", NULL, NULL, -1, NULL, "Pass base64 reconnect cookie to the connection" },
 	{ "print-reconnect-cookie", COMMAND_LINE_VALUE_BOOL, NULL, BoolValueFalse, NULL, -1, NULL, "Print base64 reconnect cookie after connecting" },
 	{ "heartbeat", COMMAND_LINE_VALUE_BOOL, NULL, BoolValueFalse, NULL, -1, NULL, "Support heartbeat PDUs" },
@@ -1362,7 +1363,7 @@ int freerdp_client_settings_command_line_status_print(rdpSettings* settings,
 			printf("\nKeyboard Layouts\n");
 
 			for (i = 0; layouts[i].code; i++)
-				printf("0x%08X\t%s\n", (int) layouts[i].code, layouts[i].name);
+				printf("0x%08"PRIX32"\t%s\n", layouts[i].code, layouts[i].name);
 
 			free(layouts);
 			layouts = freerdp_keyboard_get_layouts(RDP_KEYBOARD_LAYOUT_TYPE_VARIANT);
@@ -1370,7 +1371,7 @@ int freerdp_client_settings_command_line_status_print(rdpSettings* settings,
 			printf("\nKeyboard Layout Variants\n");
 
 			for (i = 0; layouts[i].code; i++)
-				printf("0x%08X\t%s\n", (int) layouts[i].code, layouts[i].name);
+				printf("0x%08"PRIX32"\t%s\n", layouts[i].code, layouts[i].name);
 
 			free(layouts);
 			layouts = freerdp_keyboard_get_layouts(RDP_KEYBOARD_LAYOUT_TYPE_IME);
@@ -1378,7 +1379,7 @@ int freerdp_client_settings_command_line_status_print(rdpSettings* settings,
 			printf("\nKeyboard Input Method Editors (IMEs)\n");
 
 			for (i = 0; layouts[i].code; i++)
-				printf("0x%08X\t%s\n", (int) layouts[i].code, layouts[i].name);
+				printf("0x%08"PRIX32"\t%s\n", layouts[i].code, layouts[i].name);
 
 			free(layouts);
 			printf("\n");
@@ -1497,7 +1498,7 @@ int freerdp_client_settings_parse_command_line_arguments(rdpSettings* settings,
 					settings->ServerPort = atoi(&p2[2]);
 				}
 
-				printf("hostname %s port %d\n", settings->ServerHostname, settings->ServerPort);
+				printf("hostname %s port %"PRIu32"\n", settings->ServerHostname, settings->ServerPort);
 			}
 		}
 		CommandLineSwitchCase(arg, "spn-class")
@@ -2309,6 +2310,7 @@ int freerdp_client_settings_parse_command_line_arguments(rdpSettings* settings,
 		CommandLineSwitchCase(arg, "max-loop-time")
 		{
 			settings->MaxTimeInCheckLoop = atoi(arg->Value);
+
 			if ((long) settings->MaxTimeInCheckLoop < 0)
 			{
 				WLog_ERR(TAG, "invalid max loop time: %s", arg->Value);
@@ -2359,6 +2361,14 @@ int freerdp_client_settings_parse_command_line_arguments(rdpSettings* settings,
 		CommandLineSwitchCase(arg, "auto-reconnect")
 		{
 			settings->AutoReconnectionEnabled = arg->Value ? TRUE : FALSE;
+		}
+		CommandLineSwitchCase(arg, "auto-reconnect-max-retries")
+		{
+			settings->AutoReconnectMaxRetries = atoi(arg->Value);
+
+			if ((settings->AutoReconnectMaxRetries < 0) ||
+				(settings->AutoReconnectMaxRetries > 1000))
+				return COMMAND_LINE_ERROR;
 		}
 		CommandLineSwitchCase(arg, "reconnect-cookie")
 		{
@@ -2523,9 +2533,8 @@ static BOOL freerdp_client_load_static_channel_addin(rdpChannels* channels,
 {
 	PVIRTUALCHANNELENTRY entry = NULL;
 	PVIRTUALCHANNELENTRYEX entryEx = NULL;
-
 	entryEx = (PVIRTUALCHANNELENTRYEX) freerdp_load_channel_addin_entry(name, NULL, NULL,
-						FREERDP_ADDIN_CHANNEL_STATIC | FREERDP_ADDIN_CHANNEL_ENTRYEX);
+	          FREERDP_ADDIN_CHANNEL_STATIC | FREERDP_ADDIN_CHANNEL_ENTRYEX);
 
 	if (!entryEx)
 		entry = freerdp_load_channel_addin_entry(name, NULL, NULL, FREERDP_ADDIN_CHANNEL_STATIC);
