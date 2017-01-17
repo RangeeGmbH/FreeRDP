@@ -37,6 +37,7 @@
 #include <winpr/string.h>
 #include <winpr/stream.h>
 #include <winpr/wtsapi.h>
+#include <winpr/ssl.h>
 #include <winpr/debug.h>
 
 #include <freerdp/freerdp.h>
@@ -51,7 +52,8 @@
 
 /* connectErrorCode is 'extern' in error.h. See comment there.*/
 
-UINT freerdp_channel_add_init_handle_data(rdpChannelHandles* handles, void* pInitHandle, void* pUserData)
+UINT freerdp_channel_add_init_handle_data(rdpChannelHandles* handles, void* pInitHandle,
+        void* pUserData)
 {
 	if (!handles->init)
 		handles->init = ListDictionary_New(TRUE);
@@ -89,9 +91,10 @@ void freerdp_channel_remove_init_handle_data(rdpChannelHandles* handles, void* p
 	}
 }
 
-UINT freerdp_channel_add_open_handle_data(rdpChannelHandles* handles, DWORD openHandle, void* pUserData)
+UINT freerdp_channel_add_open_handle_data(rdpChannelHandles* handles, DWORD openHandle,
+        void* pUserData)
 {
-	void* pOpenHandle = (void*) (size_t) openHandle;
+	void* pOpenHandle = (void*)(size_t) openHandle;
 
 	if (!handles->open)
 		handles->open = ListDictionary_New(TRUE);
@@ -114,14 +117,14 @@ UINT freerdp_channel_add_open_handle_data(rdpChannelHandles* handles, DWORD open
 void* freerdp_channel_get_open_handle_data(rdpChannelHandles* handles, DWORD openHandle)
 {
 	void* pUserData = NULL;
-	void* pOpenHandle = (void*) (size_t) openHandle;
+	void* pOpenHandle = (void*)(size_t) openHandle;
 	pUserData = ListDictionary_GetItemValue(handles->open, pOpenHandle);
 	return pUserData;
 }
 
 void freerdp_channel_remove_open_handle_data(rdpChannelHandles* handles, DWORD openHandle)
 {
-	void* pOpenHandle = (void*) (size_t) openHandle;
+	void* pOpenHandle = (void*)(size_t) openHandle;
 	ListDictionary_Remove(handles->open, pOpenHandle);
 
 	if (ListDictionary_Count(handles->open) < 1)
@@ -799,6 +802,13 @@ void freerdp_set_last_error(rdpContext* context, UINT32 lastError)
 		WLog_ERR(TAG, "freerdp_set_last_error %s [0x%08"PRIX32"]",
 		         freerdp_get_last_error_name(lastError), lastError);
 
+	if (context->LastError != 0)
+	{
+		WLog_ERR(TAG, "TODO: Trying to set error code %s, but %s already set!",
+		         freerdp_get_last_error_name(lastError),
+		         freerdp_get_last_error_name(context->LastError));
+	}
+
 	context->LastError = lastError;
 
 	switch (lastError)
@@ -868,6 +878,7 @@ freerdp* freerdp_new()
 	if (!instance)
 		return NULL;
 
+	winpr_InitializeSSL(WINPR_SSL_INIT_DEFAULT);
 	instance->ContextSize = sizeof(rdpContext);
 	instance->SendChannelData = freerdp_send_channel_data;
 	instance->ReceiveChannelData = freerdp_channels_data;
