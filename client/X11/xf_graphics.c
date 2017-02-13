@@ -42,25 +42,58 @@
 #include <freerdp/log.h>
 #define TAG CLIENT_TAG("x11")
 
-BOOL xf_decode_color(rdpGdi* gdi, const UINT32 srcColor,
-                     UINT32* color, UINT32* format)
+BOOL xf_decode_color(xfContext* xfc, const UINT32 srcColor, XColor* color)
 {
-	xfContext* xfc;
-	UINT32 DstFormat;
+	rdpGdi* gdi;
+	rdpSettings* settings;
 	UINT32 SrcFormat;
+	BYTE r, g, b, a;
 
-	if (!gdi || !gdi->context || !gdi->context->settings)
+	if (!xfc || !color)
 		return FALSE;
 
-	xfc = (xfContext*)gdi->context;
-	SrcFormat = gdi_get_pixel_format(gdi->context->settings->ColorDepth);
+	gdi = xfc->context.gdi;
 
-	if (format)
-		*format = SrcFormat;
+	if (!gdi)
+		return FALSE;
 
-	DstFormat = xf_get_local_color_format(xfc, FALSE);
-	*color = ConvertColor(srcColor, SrcFormat,
-	                      DstFormat, &gdi->palette);
+	settings = xfc->context.settings;
+
+	if (!settings)
+		return FALSE;
+
+	switch (settings->ColorDepth)
+	{
+		case 32:
+		case 24:
+			SrcFormat = PIXEL_FORMAT_BGR24;
+			break;
+
+		case 16:
+			SrcFormat = PIXEL_FORMAT_RGB16;
+			break;
+
+		case 15:
+			SrcFormat = PIXEL_FORMAT_RGB15;
+			break;
+
+		case 8:
+			SrcFormat = PIXEL_FORMAT_RGB8;
+			break;
+
+		default:
+			return FALSE;
+	}
+
+	SplitColor(srcColor, SrcFormat, &r, &g, &b, &a, &gdi->palette);
+	color->blue = (unsigned short)(b << 8);
+	color->green = (unsigned short)(g << 8);
+	color->red = (unsigned short)(r << 8);
+	color->flags = DoRed | DoGreen | DoBlue;
+
+	if (XAllocColor(xfc->display, xfc->colormap, color) == 0)
+		return FALSE;
+
 	return TRUE;
 }
 
@@ -393,11 +426,12 @@ static BOOL xf_Glyph_BeginDraw(rdpContext* context, UINT32 x, UINT32 y,
 {
 	xfContext* xfc = (xfContext*) context;
 	XRectangle rect;
+	XColor xbgcolor, xfgcolor;
 
-	if (!xf_decode_color(context->gdi, bgcolor, &bgcolor, NULL))
+	if (!xf_decode_color(xfc, bgcolor, &xbgcolor))
 		return FALSE;
 
-	if (!xf_decode_color(context->gdi, fgcolor, &fgcolor, NULL))
+	if (!xf_decode_color(xfc, fgcolor, &xfgcolor))
 		return FALSE;
 
 	rect.x = x;
@@ -408,14 +442,14 @@ static BOOL xf_Glyph_BeginDraw(rdpContext* context, UINT32 x, UINT32 y,
 
 	if (!fOpRedundant)
 	{
-		XSetForeground(xfc->display, xfc->gc, fgcolor);
-		XSetBackground(xfc->display, xfc->gc, fgcolor);
+		XSetForeground(xfc->display, xfc->gc, xfgcolor.pixel);
+		XSetBackground(xfc->display, xfc->gc, xfgcolor.pixel);
 		XSetFillStyle(xfc->display, xfc->gc, FillOpaqueStippled);
 		XFillRectangle(xfc->display, xfc->drawable, xfc->gc, x, y, width, height);
 	}
 
-	XSetForeground(xfc->display, xfc->gc, bgcolor);
-	XSetBackground(xfc->display, xfc->gc, fgcolor);
+	XSetForeground(xfc->display, xfc->gc, xbgcolor.pixel);
+	XSetBackground(xfc->display, xfc->gc, xfgcolor.pixel);
 	xf_unlock_x11(xfc, FALSE);
 	return TRUE;
 }
@@ -426,11 +460,12 @@ static BOOL xf_Glyph_EndDraw(rdpContext* context, UINT32 x, UINT32 y,
 {
 	xfContext* xfc = (xfContext*) context;
 	BOOL ret = TRUE;
+	XColor xfgcolor, xbgcolor;
 
-	if (!xf_decode_color(context->gdi, bgcolor, &bgcolor, NULL))
+	if (!xf_decode_color(xfc, bgcolor, &xbgcolor))
 		return FALSE;
 
-	if (!xf_decode_color(context->gdi, fgcolor, &fgcolor, NULL))
+	if (!xf_decode_color(xfc, fgcolor, &xfgcolor))
 		return FALSE;
 
 	if (xfc->drawing == xfc->primary)
@@ -488,10 +523,12 @@ BOOL xf_register_graphics(rdpGraphics* graphics)
 UINT32 xf_get_local_color_format(xfContext* xfc, BOOL aligned)
 {
 	UINT32 DstFormat;
-	BOOL invert = xfc->invert;
+	BOOL invert = FALSE;
 
 	if (!xfc)
 		return 0;
+
+	invert = xfc->invert;
 
 	if (xfc->depth == 32)
 		DstFormat = (!invert) ? PIXEL_FORMAT_RGBA32 : PIXEL_FORMAT_BGRA32;
