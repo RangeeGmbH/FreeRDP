@@ -81,12 +81,10 @@ struct xf_clipboard
 	int requestedFormatId;
 
 	BYTE* data;
-	BYTE* data_raw;
 	BOOL data_raw_format;
 	UINT32 data_format_id;
 	const char* data_format_name;
 	int data_length;
-	int data_raw_length;
 	XEvent* respond;
 
 	Window owner;
@@ -776,23 +774,6 @@ static BOOL xf_cliprdr_process_selection_notify(xfClipboard* clipboard,
 	}
 }
 
-static void xf_cliprdr_clear_cached_data(xfClipboard* clipboard)
-{
-	if (clipboard->data)
-	{
-		free(clipboard->data);
-		clipboard->data = NULL;
-	}
-	clipboard->data_length = 0;
-
-	if (clipboard->data_raw)
-	{
-		free(clipboard->data_raw);
-		clipboard->data_raw = NULL;
-	}
-	clipboard->data_raw_length = 0;
-}
-
 static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard,
         XEvent* xevent)
 {
@@ -804,7 +785,6 @@ static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard,
 	BYTE* data = NULL;
 	BOOL delayRespond;
 	BOOL rawTransfer;
-	BOOL matchingFormat;
 	unsigned long length;
 	unsigned long bytes_left;
 	CLIPRDR_FORMAT* format;
@@ -867,23 +847,13 @@ static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard,
 				}
 			}
 
-			/* We can compare format names by pointer value here as they are both
-			 * taken from the same clipboard->serverFormats array */
-			matchingFormat = (formatId == clipboard->data_format_id)
-				&& (formatName == clipboard->data_format_name);
-
-			if (matchingFormat && (clipboard->data != 0) && !rawTransfer)
+			if ((clipboard->data != 0) && (formatId == clipboard->data_format_id)
+			    && (formatName == clipboard->data_format_name))
 			{
-				/* Cached converted clipboard data available. Send it now */
+				/* Cached clipboard data available. Send it now */
 				respond->xselection.property = xevent->xselectionrequest.property;
 				xf_cliprdr_provide_data(clipboard, respond, clipboard->data,
 				                        clipboard->data_length);
-			}
-			else if (matchingFormat && (clipboard->data_raw != 0) && rawTransfer)
-			{
-				/* Cached raw clipboard data available. Send it now */
-				respond->xselection.property = xevent->xselectionrequest.property;
-				xf_cliprdr_provide_data(clipboard, respond, clipboard->data_raw, clipboard->data_raw_length);
 			}
 			else if (clipboard->respond)
 			{
@@ -895,7 +865,11 @@ static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard,
 				 * Send clipboard data request to the server.
 				 * Response will be postponed after receiving the data
 				 */
-				xf_cliprdr_clear_cached_data(clipboard);
+				if (clipboard->data)
+				{
+					free(clipboard->data);
+					clipboard->data = NULL;
+				}
 
 				respond->xselection.property = xevent->xselectionrequest.property;
 				clipboard->respond = respond;
@@ -1154,7 +1128,11 @@ static UINT xf_cliprdr_server_format_list(CliprdrClientContext* context,
 	xfContext* xfc = clipboard->xfc;
 	UINT ret;
 
-	xf_cliprdr_clear_cached_data(clipboard);
+	if (clipboard->data)
+	{
+		free(clipboard->data);
+		clipboard->data = NULL;
+	}
 
 	clipboard->data_format_id = -1;
 	clipboard->data_format_name = NULL;
@@ -1298,7 +1276,11 @@ static UINT xf_cliprdr_server_format_data_response(CliprdrClientContext*
 	if (!clipboard->respond)
 		return CHANNEL_RC_OK;
 
-	xf_cliprdr_clear_cached_data(clipboard);
+	if (clipboard->data)
+	{
+		free(clipboard->data);
+		clipboard->data = NULL;
+	}
 
 	pDstData = NULL;
 	DstSize = 0;
@@ -1363,25 +1345,8 @@ static UINT xf_cliprdr_server_format_data_response(CliprdrClientContext*
 		}
 	}
 
-	/* Cache converted and original data to avoid doing a possibly costly
-	 * conversion again on subsequent requests */
 	clipboard->data = pDstData;
 	clipboard->data_length = DstSize;
-
-	/* We have to copy the original data again, as pSrcData is now owned
-	 * by clipboard->system. Memory allocation failure is not fatal here
-	 * as this is only a cached value. */
-	clipboard->data_raw = (BYTE*) malloc(size);
-	if (clipboard->data_raw)
-	{
-		CopyMemory(clipboard->data_raw, data, size);
-		clipboard->data_raw_length = size;
-	}
-	else
-	{
-		WLog_WARN(TAG, "failed to allocate %"PRIu32" bytes for a copy of raw clipboard data", size);
-	}
-
 	xf_cliprdr_provide_data(clipboard, clipboard->respond, pDstData, DstSize);
 	XSendEvent(xfc->display, clipboard->respond->xselection.requestor, 0, 0,
 	           clipboard->respond);
@@ -1526,7 +1491,6 @@ void xf_clipboard_free(xfClipboard* clipboard)
 
 	ClipboardDestroy(clipboard->system);
 	free(clipboard->data);
-	free(clipboard->data_raw);
 	free(clipboard->respond);
 	free(clipboard->incr_data);
 	free(clipboard);
