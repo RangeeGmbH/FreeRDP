@@ -1694,6 +1694,7 @@ void rdp_free(rdpRdp* rdp)
 		winpr_Cipher_Free(rdp->fips_encrypt);
 		winpr_Cipher_Free(rdp->fips_decrypt);
 		freerdp_settings_free(rdp->settings);
+		freerdp_settings_free(rdp->settingsCopy);
 		transport_free(rdp->transport);
 		license_free(rdp->license);
 		input_free(rdp->input);
