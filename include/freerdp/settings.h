@@ -1080,6 +1080,7 @@ struct rdp_settings
 	/* Window Settings */
 	ALIGN64 BOOL Workarea; /* 1536 */
 	ALIGN64 BOOL Fullscreen; /* 1537 */
+	ALIGN64 BOOL Openbox; /* 153x */
 	ALIGN64 UINT32 PercentScreen; /* 1538 */
 	ALIGN64 BOOL GrabKeyboard; /* 1539 */
 	ALIGN64 BOOL Decorations; /* 1540 */
