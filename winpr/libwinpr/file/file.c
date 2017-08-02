@@ -524,7 +524,7 @@ static HANDLE_OPS shmOps = {
 
 static const char* FileGetMode(DWORD dwDesiredAccess, DWORD dwCreationDisposition, BOOL* create)
 {
-	BOOL writeable = (dwDesiredAccess & (GENERIC_WRITE | STANDARD_RIGHTS_WRITE | FILE_WRITE_DATA | FILE_APPEND_DATA)) != 0;
+	BOOL writeable = (dwDesiredAccess & (GENERIC_WRITE | FILE_WRITE_DATA | FILE_APPEND_DATA)) != 0;
 
 	switch(dwCreationDisposition)
 	{
@@ -560,7 +560,12 @@ UINT32 map_posix_err(int fs_errno)
 		case 0:
 			rc = STATUS_SUCCESS;
 			break;
-
+		case ENODEV:
+		case ENOTDIR:
+		case ENXIO:
+			rc = ERROR_FILE_NOT_FOUND;
+			break;
+		case EROFS:
 		case EPERM:
 		case EACCES:
 			rc = ERROR_ACCESS_DENIED;
@@ -587,10 +592,12 @@ UINT32 map_posix_err(int fs_errno)
 			break;
 
 		default:
+			WLog_ERR(TAG, "Missing ERRNO mapping %s [%d]",
+				strerror(fs_errno), fs_errno);
 			rc = STATUS_UNSUCCESSFUL;
 			break;
 	}
-	
+
 	return rc;
 }
 
