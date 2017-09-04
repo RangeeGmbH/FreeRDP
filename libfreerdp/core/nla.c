@@ -143,7 +143,7 @@ void nla_identity_free(SEC_WINNT_AUTH_IDENTITY* identity)
  * @param credssp
  */
 
-static int nla_client_init(rdpNla* nla)
+int nla_client_init(rdpNla* nla)
 {
 	char* spn;
 	int length;
@@ -388,7 +388,7 @@ int nla_client_begin(rdpNla* nla)
 	return 1;
 }
 
-static int nla_client_recv(rdpNla* nla)
+int nla_client_recv(rdpNla* nla)
 {
 	int status = -1;
 
@@ -533,7 +533,7 @@ static int nla_client_recv(rdpNla* nla)
 	return status;
 }
 
-static int nla_client_authenticate(rdpNla* nla)
+int nla_client_authenticate(rdpNla* nla)
 {
 	wStream* s;
 	int status;
@@ -581,7 +581,7 @@ static int nla_client_authenticate(rdpNla* nla)
  * @param credssp
  */
 
-static int nla_server_init(rdpNla* nla)
+int nla_server_init(rdpNla* nla)
 {
 	rdpTls* tls = nla->transport->tls;
 
@@ -668,7 +668,7 @@ static int nla_server_init(rdpNla* nla)
  * @return 1 if authentication is successful
  */
 
-static int nla_server_authenticate(rdpNla* nla)
+int nla_server_authenticate(rdpNla* nla)
 {
 	if (nla_server_init(nla) < 1)
 		return -1;
@@ -913,7 +913,7 @@ int nla_authenticate(rdpNla* nla)
 		return nla_client_authenticate(nla);
 }
 
-static void ap_integer_increment_le(BYTE* number, int size)
+void ap_integer_increment_le(BYTE* number, int size)
 {
 	int index;
 
@@ -932,7 +932,7 @@ static void ap_integer_increment_le(BYTE* number, int size)
 	}
 }
 
-static void ap_integer_decrement_le(BYTE* number, int size)
+void ap_integer_decrement_le(BYTE* number, int size)
 {
 	int index;
 
@@ -1006,9 +1006,9 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 	ULONG pfQOP = 0;
 	BYTE* public_key1;
 	BYTE* public_key2;
-	int public_key_length = 0;
+	int public_key_length;
 	int signature_length;
-	SecBuffer Buffers[2] = { 0 };
+	SecBuffer Buffers[2];
 	SecBufferDesc Message;
 	SECURITY_STATUS status;
 	signature_length = nla->pubKeyAuth.cbBuffer - nla->PublicKey.cbBuffer;
@@ -1042,7 +1042,6 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 	{
 		WLog_ERR(TAG, "DecryptMessage failure %s [%08"PRIX32"]",
 		         GetSecurityStatusString(status), status);
-		free(buffer);
 		return status;
 	}
 
@@ -1062,7 +1061,6 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 		winpr_HexDump(TAG, WLOG_ERROR, public_key1, public_key_length);
 		WLog_ERR(TAG, "Actual (length = %d):", public_key_length);
 		winpr_HexDump(TAG, WLOG_ERROR, public_key2, public_key_length);
-		free(buffer);
 		return SEC_E_MESSAGE_ALTERED; /* DO NOT SEND CREDENTIALS! */
 	}
 
@@ -1178,7 +1176,7 @@ BOOL nla_read_ts_password_creds(rdpNla* nla, wStream* s)
 	return TRUE;
 }
 
-static int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
+int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
 {
 	int size = 0;
 	int innerSize = nla_sizeof_ts_password_creds(nla);
@@ -1204,7 +1202,7 @@ static int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
 	return size;
 }
 
-static int nla_sizeof_ts_credentials(rdpNla* nla)
+int nla_sizeof_ts_credentials(rdpNla* nla)
 {
 	int size = 0;
 	size += ber_sizeof_integer(1);
@@ -1217,7 +1215,7 @@ static BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 {
 	wStream* s;
 	int length;
-	int ts_password_creds_length = 0;
+	int ts_password_creds_length;
 	BOOL ret;
 	s = Stream_New(ts_credentials->pvBuffer, ts_credentials->cbBuffer);
 
@@ -1240,7 +1238,7 @@ static BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 	return ret;
 }
 
-static int nla_write_ts_credentials(rdpNla* nla, wStream* s)
+int nla_write_ts_credentials(rdpNla* nla, wStream* s)
 {
 	int size = 0;
 	int passwordSize;
@@ -1263,7 +1261,7 @@ static int nla_write_ts_credentials(rdpNla* nla, wStream* s)
  * @param credssp
  */
 
-static BOOL nla_encode_ts_credentials(rdpNla* nla)
+BOOL nla_encode_ts_credentials(rdpNla* nla)
 {
 	wStream* s;
 	int length;
@@ -1315,7 +1313,7 @@ static BOOL nla_encode_ts_credentials(rdpNla* nla)
 	return TRUE;
 }
 
-static SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
+SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 {
 	SecBuffer Buffers[2];
 	SecBufferDesc Message;
@@ -1359,7 +1357,7 @@ static SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 	return SEC_E_OK;
 }
 
-static SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
+SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 {
 	int length;
 	BYTE* buffer;
@@ -1396,7 +1394,6 @@ static SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 	{
 		WLog_ERR(TAG, "DecryptMessage failure %s [0x%08"PRIX32"]",
 		         GetSecurityStatusString(status), status);
-		free(buffer);
 		return status;
 	}
 
@@ -1410,14 +1407,14 @@ static SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 	return SEC_E_OK;
 }
 
-static int nla_sizeof_nego_token(int length)
+int nla_sizeof_nego_token(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-static int nla_sizeof_nego_tokens(int length)
+int nla_sizeof_nego_tokens(int length)
 {
 	length = nla_sizeof_nego_token(length);
 	length += ber_sizeof_sequence_tag(length);
@@ -1426,21 +1423,21 @@ static int nla_sizeof_nego_tokens(int length)
 	return length;
 }
 
-static int nla_sizeof_pub_key_auth(int length)
+int nla_sizeof_pub_key_auth(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-static int nla_sizeof_auth_info(int length)
+int nla_sizeof_auth_info(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-static int nla_sizeof_ts_request(int length)
+int nla_sizeof_ts_request(int length)
 {
 	length += ber_sizeof_integer(2);
 	length += ber_sizeof_contextual_tag(3);
@@ -1541,7 +1538,7 @@ BOOL nla_send(rdpNla* nla)
 	return TRUE;
 }
 
-static int nla_decode_ts_request(rdpNla* nla, wStream* s)
+int nla_decode_ts_request(rdpNla* nla, wStream* s)
 {
 	int length;
 
@@ -1853,8 +1850,6 @@ void nla_free(rdpNla* nla)
 	if (nla->table)
 	{
 		SECURITY_STATUS status;
-		status = nla->table->FreeCredentialsHandle(&nla->credentials);
-
 		status = nla->table->DeleteSecurityContext(&nla->context);
 
 		if (status != SEC_E_OK)

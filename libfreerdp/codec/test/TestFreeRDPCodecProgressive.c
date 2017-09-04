@@ -1,4 +1,3 @@
-#include <winpr/wtypes.h>
 #include <winpr/crt.h>
 #include <winpr/path.h>
 #include <winpr/image.h>
@@ -128,7 +127,7 @@
 struct _EGFX_SAMPLE_FILE
 {
 	BYTE* buffer;
-	size_t size;
+	UINT32 size;
 };
 typedef struct _EGFX_SAMPLE_FILE EGFX_SAMPLE_FILE;
 
@@ -266,7 +265,7 @@ static int test_image_fill_unused_quarters(BYTE* pDstData, int nDstStep, int nWi
 	return 1;
 }
 
-static BYTE* test_progressive_load_file(char* path, char* file, size_t* size)
+static BYTE* test_progressive_load_file(char* path, char* file, UINT32* size)
 {
 	FILE* fp;
 	BYTE* buffer;
@@ -282,9 +281,9 @@ static BYTE* test_progressive_load_file(char* path, char* file, size_t* size)
 	if (!fp)
 		return NULL;
 
-	_fseeki64(fp, 0, SEEK_END);
-	*size = _ftelli64(fp);
-	_fseeki64(fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_END);
+	*size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
 	buffer = (BYTE*) malloc(*size);
 
 	if (!buffer)
@@ -484,7 +483,7 @@ static int test_progressive_load_files(char* ms_sample_path, EGFX_SAMPLE_FILE fi
 	return 1;
 }
 
-static BYTE* test_progressive_load_bitmap(char* path, char* file, size_t* size, int quarter)
+static BYTE* test_progressive_load_bitmap(char* path, char* file, UINT32* size, int quarter)
 {
 	int status;
 	BYTE* buffer;

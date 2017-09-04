@@ -21,7 +21,6 @@
 #include "config.h"
 #endif
 
-#include <winpr/wtypes.h>
 #include <winpr/timezone.h>
 #include <winpr/crt.h>
 #include "../log.h"
@@ -2000,13 +1999,13 @@ static UINT64 winpr_windows_gmtime()
 
 static char* winpr_read_unix_timezone_identifier_from_file(FILE* fp)
 {
-	INT64 length;
+	long length;
 	char* tzid = NULL;
 
-	if (_fseeki64(fp, 0, SEEK_END) != 0)
+	if (fseek(fp, 0, SEEK_END) != 0)
 		return NULL;
-	length = _ftelli64(fp);
-	if (_fseeki64(fp, 0, SEEK_SET) != 0)
+	length = ftell(fp);
+	if (fseek(fp, 0, SEEK_SET) != 0)
 		return NULL;
 
 	if (length < 2)

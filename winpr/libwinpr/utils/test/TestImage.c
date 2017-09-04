@@ -1,4 +1,3 @@
-#include <winpr/wtypes.h>
 #include <winpr/crt.h>
 #include <winpr/path.h>
 #include <winpr/print.h>
@@ -13,7 +12,7 @@ static void *read_image(const char *src, size_t *size)
 {
 	int success = 0;
 	void *a = NULL;
-	INT64 src_size;
+	long src_size;
 	FILE *fsrc = fopen(src, "rb");
 
 	if (!fsrc)
@@ -22,15 +21,15 @@ static void *read_image(const char *src, size_t *size)
 		goto cleanup;
 	}
 
-	if (_fseeki64(fsrc, 0, SEEK_END))
+	if (fseek(fsrc, 0, SEEK_END))
 	{
 		fprintf(stderr, "Failed to seek to file end\n");
 		goto cleanup;
 	}
 
-	src_size = _ftelli64(fsrc);
+	src_size = ftell(fsrc);
 
-	if (_fseeki64(fsrc, 0, SEEK_SET))
+	if (fseek(fsrc, 0, SEEK_SET))
 	{
 		fprintf(stderr, "Failed to seek to SEEK_SET\n");
 		goto cleanup;

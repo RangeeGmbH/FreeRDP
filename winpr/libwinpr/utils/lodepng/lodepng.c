@@ -26,7 +26,6 @@ freely, subject to the following restrictions:
  * Modifications fixing various errors. */
 
 #include "lodepng.h"
-#include <winpr/wtypes.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -343,7 +342,7 @@ static int lodepng_add32bitInt(ucvector* buffer, unsigned value)
 unsigned lodepng_load_file(unsigned char** out, size_t* outsize, const char* filename)
 {
   FILE* file;
-  INT64 size;
+  long size;
 
   /*provide some proper output values if error will happen*/
   *out = 0;
@@ -353,8 +352,8 @@ unsigned lodepng_load_file(unsigned char** out, size_t* outsize, const char* fil
   if(!file) return 78;
 
   /*get filesize:*/
-  _fseeki64(file , 0 , SEEK_END);
-  size = _ftelli64(file);
+  fseek(file , 0 , SEEK_END);
+  size = ftell(file);
   rewind(file);
 
   /*read contents of the file into the vector*/

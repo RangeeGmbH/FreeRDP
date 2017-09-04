@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <winpr/wtypes.h>
 #include <winpr/crt.h>
 
 #include <winpr/ini.h>
@@ -97,20 +96,20 @@ int IniFile_Open_File(wIniFile* ini, const char* filename)
 
 int IniFile_Load_File(wIniFile* ini, const char* filename)
 {
-	INT64 fileSize;
+	int fileSize;
 
 	if (IniFile_Open_File(ini, filename) < 0)
 		return -1;
 
-	if (_fseeki64(ini->fp, 0, SEEK_END) < 0)
+	if (fseek(ini->fp, 0, SEEK_END) < 0)
 		goto out_file;
 
-	fileSize = _ftelli64(ini->fp);
+	fileSize = ftell(ini->fp);
 	
 	if (fileSize < 0)
 		goto out_file;
 	
-	if (_fseeki64(ini->fp, 0, SEEK_SET) < 0)
+	if (fseek(ini->fp, 0, SEEK_SET) < 0)
 		goto out_file;
 
 	ini->line = NULL;

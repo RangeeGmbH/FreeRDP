@@ -663,6 +663,12 @@ void freerdp_channels_close(rdpChannels* channels, freerdp* instance)
 	{
 		pChannelOpenData = &channels->openDataList[index];
 
+		if (pChannelOpenData->pInterface)
+		{
+			free(pChannelOpenData->pInterface);
+			pChannelOpenData->pInterface = NULL;
+		}
+
 		freerdp_channel_remove_open_handle_data(&g_ChannelHandles, pChannelOpenData->OpenHandle);
 
 		if (channels->openHandles)

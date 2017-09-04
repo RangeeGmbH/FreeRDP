@@ -23,7 +23,6 @@
 #include "config.h"
 #endif
 
-#include <winpr/wtypes.h>
 #include <winpr/crt.h>
 
 #include <winpr/image.h>
@@ -103,15 +102,15 @@ int winpr_image_write(wImage* image, const char* filename)
 
 int winpr_image_png_read_fp(wImage* image, FILE* fp)
 {
-	INT64 size;
+	int size;
 	BYTE* data;
 	UINT32 width;
 	UINT32 height;
 	int lodepng_status;
 
-	_fseeki64(fp, 0, SEEK_END);
-	size = _ftelli64(fp);
-	_fseeki64(fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_END);
+	size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
 
 	data = (BYTE*) malloc(size);
 
@@ -181,9 +180,9 @@ int winpr_image_bitmap_read_fp(wImage* image, FILE* fp)
 	if (fread((void*) &bi, sizeof(WINPR_BITMAP_INFO_HEADER), 1, fp) != 1)
 		return -1;
 
-	if (_ftelli64(fp) != bf.bfOffBits)
+	if (ftell(fp) != bf.bfOffBits)
 	{
-		_fseeki64(fp, bf.bfOffBits, SEEK_SET);
+		fseek(fp, bf.bfOffBits, SEEK_SET);
 	}
 
 	image->width = bi.biWidth;
@@ -316,7 +315,7 @@ int winpr_image_read(wImage* image, const char* filename)
 		return -1;
 	}
 
-	if (fread((void*) &sig, sizeof(sig), 1, fp) != 1 || _fseeki64(fp, 0, SEEK_SET) < 0)
+	if (fread((void*) &sig, sizeof(sig), 1, fp) != 1 || fseek(fp, 0, SEEK_SET) < 0)
 	{
 		fclose(fp);
 		return -1;

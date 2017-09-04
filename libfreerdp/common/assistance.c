@@ -21,7 +21,6 @@
 #include "config.h"
 #endif
 
-#include <winpr/wtypes.h>
 #include <winpr/crt.h>
 #include <winpr/crypto.h>
 #include <winpr/print.h>
@@ -1066,16 +1065,16 @@ int freerdp_assistance_parse_file(rdpAssistanceFile* file, const char* name)
 	BYTE* buffer;
 	FILE* fp = NULL;
 	size_t readSize;
-	INT64 fileSize;
+	long int fileSize;
 
 	fp = fopen(name, "r");
 
 	if (!fp)
 		return -1;
 
-	_fseeki64(fp, 0, SEEK_END);
-	fileSize = _ftelli64(fp);
-	_fseeki64(fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_END);
+	fileSize = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
 
 	if (fileSize < 1)
 	{

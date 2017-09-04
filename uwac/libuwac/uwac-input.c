@@ -683,12 +683,7 @@ static void pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint3
 	/*UwacSeat *seat = data;*/
 }
 
-static void pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis)
-{
-	/*UwacSeat *seat = data;*/
-}
-
-static void pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete)
+void pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis)
 {
 	/*UwacSeat *seat = data;*/
 }
@@ -702,7 +697,6 @@ static const struct wl_pointer_listener pointer_listener = {
 	pointer_frame,
 	pointer_axis_source,
 	pointer_axis_stop,
-	pointer_axis_discrete,
 };
 
 

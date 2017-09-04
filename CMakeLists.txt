@@ -189,11 +189,6 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
 	add_definitions("-D_FILE_OFFSET_BITS=64")
 endif()
 
-# Use Standard conforming getpwnam_r() on Solaris.
-if("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
-	add_definitions("-D_POSIX_PTHREAD_SEMANTICS")
-endif()
-
 # Compiler-specific flags
 if(CMAKE_COMPILER_IS_GNUCC)
 	if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
@@ -283,7 +278,6 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-macros -Wno-padded")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-c11-extensions -Wno-gnu")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
 	if(WITH_SSE2)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mssse3")
 	endif()

@@ -518,6 +518,7 @@ struct rdp_gdi
 	BOOL inGfxFrame;
 	BOOL graphicsReset;
 	UINT16 outputSurfaceId;
+	REGION16 invalidRegion;
 	RdpgfxClientContext* gfx;
 
 	wLog* log;

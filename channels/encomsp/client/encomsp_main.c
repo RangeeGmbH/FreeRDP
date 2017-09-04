@@ -1148,7 +1148,6 @@ static UINT encomsp_virtual_channel_event_disconnected(encomspPlugin* encomsp)
 static UINT encomsp_virtual_channel_event_terminated(encomspPlugin* encomsp)
 {
 	encomsp->InitHandle = 0;
-	free(encomsp->context);
 	free(encomsp);
 	return CHANNEL_RC_OK;
 }

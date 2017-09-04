@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 
 			if ((version != 1) && (version != 2))
 			{
-				printf("unknown version %d \n\n", version);
+				printf("unkown version %d \n\n", version);
 				usage_and_exit();
 			}
 		}

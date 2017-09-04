@@ -297,43 +297,27 @@ static DVCMAN_CHANNEL* dvcman_channel_new(IWTSVirtualChannelManager*
 static void dvcman_channel_free(void* arg)
 {
 	DVCMAN_CHANNEL* channel = (DVCMAN_CHANNEL*) arg;
-	UINT error = CHANNEL_RC_OK;
 
-	if (channel)
+	if (channel->channel_callback)
 	{
-		if (channel->channel_callback)
-		{
-			IFCALL(channel->channel_callback->OnClose,
-			       channel->channel_callback);
-		}
-
-		if (channel->status == CHANNEL_RC_OK)
-		{
-			IWTSVirtualChannel* ichannel = (IWTSVirtualChannel*) channel;
-
-			if (channel->dvcman && channel->dvcman->drdynvc)
-			{			
-				DrdynvcClientContext* context = channel->dvcman->drdynvc->context;
-				if (context)
-				{
-					IFCALLRET(context->OnChannelDisconnected, error,
-							  context, channel->channel_name,
-							  channel->pInterface);
-				}
-			}
-
-			error = IFCALLRESULT(CHANNEL_RC_OK, ichannel->Close, ichannel);
-			if (error != CHANNEL_RC_OK)
-				WLog_ERR(TAG, "Close failed with error %"PRIu32"!", error);
-		}
-
-		if (channel->dvc_data)
-			Stream_Release(channel->dvc_data);
-
-		DeleteCriticalSection(&(channel->lock));
-
-		free(channel->channel_name);
+		channel->channel_callback->OnClose(channel->channel_callback);
+		channel->channel_callback = NULL;
 	}
+
+	if (channel->dvc_data)
+	{
+		Stream_Release(channel->dvc_data);
+		channel->dvc_data = NULL;
+	}
+
+	DeleteCriticalSection(&(channel->lock));
+
+	if (channel->channel_name)
+	{
+		free(channel->channel_name);
+		channel->channel_name = NULL;
+	}
+
 	free(channel);
 }
 
@@ -424,7 +408,6 @@ static UINT dvcman_write_channel(IWTSVirtualChannel* pChannel, ULONG cbSize,
  */
 static UINT dvcman_close_channel_iface(IWTSVirtualChannel* pChannel)
 {
-
 	DVCMAN_CHANNEL* channel = (DVCMAN_CHANNEL*) pChannel;
 
 	if (!channel)
@@ -457,7 +440,7 @@ static UINT dvcman_create_channel(IWTSVirtualChannelManager* pChannelMgr,
 		return CHANNEL_RC_NO_MEMORY;
 	}
 
-	channel->status = ERROR_NOT_CONNECTED;
+	channel->status = 1;
 	ArrayList_Add(dvcman->channels, channel);
 
 	for (i = 0; i < dvcman->num_listeners; i++)
@@ -478,7 +461,7 @@ static UINT dvcman_create_channel(IWTSVirtualChannelManager* pChannelMgr,
 			{
 				WLog_DBG(TAG, "listener %s created new channel %"PRIu32"",
 				         listener->channel_name, channel->channel_id);
-				channel->status = CHANNEL_RC_OK;
+				channel->status = 0;
 				channel->channel_callback = pCallback;
 				channel->pInterface = listener->iface.pInterface;
 				context = dvcman->drdynvc->context;
@@ -553,9 +536,10 @@ static UINT dvcman_close_channel(IWTSVirtualChannelManager* pChannelMgr,
                                  UINT32 ChannelId)
 {
 	DVCMAN_CHANNEL* channel;
-	UINT error = CHANNEL_RC_OK;
+	IWTSVirtualChannel* ichannel;
+	DrdynvcClientContext* context;
 	DVCMAN* dvcman = (DVCMAN*) pChannelMgr;
-
+	UINT error = CHANNEL_RC_OK;
 	channel = (DVCMAN_CHANNEL*) dvcman_find_channel_by_id(pChannelMgr, ChannelId);
 
 	if (!channel)
@@ -568,8 +552,30 @@ static UINT dvcman_close_channel(IWTSVirtualChannelManager* pChannelMgr,
 		return CHANNEL_RC_OK;
 	}
 
+	if (channel->status == CHANNEL_RC_OK)
+	{
+		context = dvcman->drdynvc->context;
+		IFCALLRET(context->OnChannelDisconnected, error, context, channel->channel_name,
+		          channel->pInterface);
+
+		if (error)
+		{
+			WLog_ERR(TAG, "OnChannelDisconnected returned with error %"PRIu32"!", error);
+			return error;
+		}
+
+		WLog_DBG(TAG, "dvcman_close_channel: channel %"PRIu32" closed", ChannelId);
+		ichannel = (IWTSVirtualChannel*) channel;
+
+		if ((ichannel->Close) && (error = ichannel->Close(ichannel)))
+		{
+			WLog_ERR(TAG, "Close failed with error %"PRIu32"!", error);
+			return error;
+		}
+	}
+
 	ArrayList_Remove(dvcman->channels, channel);
-	return error;
+	return CHANNEL_RC_OK;
 }
 
 /**
@@ -1430,7 +1436,6 @@ static UINT drdynvc_virtual_channel_event_terminated(drdynvcPlugin* drdynvc)
 		return CHANNEL_RC_BAD_CHANNEL_HANDLE;
 
 	drdynvc->InitHandle = 0;
-	free(drdynvc->context);
 	free(drdynvc);
 	return CHANNEL_RC_OK;
 }

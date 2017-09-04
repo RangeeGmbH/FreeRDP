@@ -395,13 +395,16 @@ fail:
 
 BOOL drive_file_seek(DRIVE_FILE* file, UINT64 Offset)
 {
-	LARGE_INTEGER loffset;
+	LONG lDistHigh;
+	DWORD dwPtrLow;
 
 	if (!file)
 		return FALSE;
 
-	loffset.QuadPart = Offset;
-	return SetFilePointerEx(file->file_handle, loffset, NULL, FILE_BEGIN);
+	lDistHigh = Offset >> 32;
+	DEBUG_WSTR("Seek %s", file->fullpath);
+	dwPtrLow = SetFilePointer(file->file_handle, Offset & 0xFFFFFFFF, &lDistHigh, FILE_BEGIN);
+	return dwPtrLow != INVALID_SET_FILE_POINTER;
 }
 
 BOOL drive_file_read(DRIVE_FILE* file, BYTE* buffer, UINT32* Length)
@@ -630,7 +633,8 @@ BOOL drive_file_set_information(DRIVE_FILE* file, UINT32 FsInformationClass, UIN
 
 			liSize.QuadPart = size & 0xFFFFFFFF;
 
-			if (!SetFilePointerEx(file->file_handle, liSize, NULL, FILE_BEGIN))
+			if (SetFilePointer(file->file_handle, liSize.LowPart, &liSize.HighPart,
+			                   FILE_BEGIN) == INVALID_SET_FILE_POINTER)
 			{
 				WLog_ERR(TAG, "Unable to truncate %s to %d (%"PRId32")", file->fullpath, size, GetLastError());
 				return FALSE;
