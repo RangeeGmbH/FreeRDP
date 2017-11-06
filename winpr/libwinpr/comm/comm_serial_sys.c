@@ -737,10 +737,12 @@ static BOOL _set_handflow(WINPR_COMM* pComm, const SERIAL_HANDFLOW* pHandflow)
 	// FIXME: could be implemented during read/write I/O
 	if (pHandflow->FlowReplace & SERIAL_XOFF_CONTINUE)
 	{
+#if 0
 		/* not supported on Linux */
 		CommLog_Print(WLOG_WARN, "Attempt to use the unsupported SERIAL_XOFF_CONTINUE feature.");
 		SetLastError(ERROR_NOT_SUPPORTED);
 		result = FALSE; /* but keep on */
+#endif
 	}
 
 	/* XonLimit */
