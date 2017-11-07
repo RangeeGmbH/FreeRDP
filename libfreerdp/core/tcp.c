@@ -1052,7 +1052,7 @@ BOOL freerdp_tcp_set_keep_alive_mode(int sockfd)
 
 #endif
 #ifdef TCP_USER_TIMEOUT
-	optval = 9000;
+	optval = 30000;
 	optlen = sizeof(optval);
 
 	if (setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (void*) &optval, optlen) < 0)
