@@ -252,7 +252,10 @@ BOOL freerdp_image_copy_from_pointer_data(
 					else if (andPixel && !xorPixel)
 						color = FreeRDPGetColor(DstFormat, 0, 0, 0, 0); /* transparent */
 					else if (andPixel && xorPixel)
-						color = freerdp_image_inverted_pointer_color(x, y, DstFormat); /* inverted */
+						/* Inverted: Currently not working, creates a dotted cursor 
+						color = freerdp_image_inverted_pointer_color(x, y, DstFormat);
+						*/
+						color = FreeRDPGetColor(DstFormat, 0, 0, 0, 0xFF); /* black */
 
 					WriteColor(pDstPixel, DstFormat, color);
 					pDstPixel += GetBytesPerPixel(DstFormat);
@@ -354,10 +357,12 @@ BOOL freerdp_image_copy_from_pointer_data(
 
 						if (andPixel)
 						{
+
 							if (xorPixel == 0xFF000000) /* black -> transparent */
 								xorPixel = 0x00000000;
 							else if (xorPixel == 0xFFFFFFFF) /* white -> inverted */
 								xorPixel = freerdp_image_inverted_pointer_color(x, y, PIXEL_FORMAT_ARGB32);
+
 						}
 
 						color = FreeRDPConvertColor(xorPixel, PIXEL_FORMAT_ARGB32,
