@@ -432,12 +432,13 @@ BOOL xf_generic_MotionNotify_(xfContext* xfc, int x, int y, Window window, BOOL 
 	xf_event_adjust_coordinates(xfc, &x, &y);
 	freerdp_client_send_button_event(&xfc->common, FALSE, PTR_FLAGS_MOVE, x, y);
 
+	/* Rangee Patch for a not too aggressive xfreerdp focusing
 	if (xfc->fullscreen && !app)
 	{
 		if (xfc->window)
 			XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
 	}
-
+	 */
 	return TRUE;
 }
 
@@ -543,6 +544,14 @@ BOOL xf_generic_ButtonEvent_(xfContext* xfc, int x, int y, int button, Window wi
 				freerdp_client_send_extended_button_event(&xfc->common, FALSE, flags, x, y);
 			else
 				freerdp_client_send_button_event(&xfc->common, FALSE, flags, x, y);
+		}
+
+		if (!app)
+		{
+			/* Rangee Patch for a not too aggressive xfreerdp focusing
+			 * Allow user to get focus back by clicking into the window.
+			 * Workaround for xscreensaver stealing keyboard focus. */
+			XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
 		}
 	}
 
@@ -774,9 +783,10 @@ static BOOL xf_event_EnterNotify(xfContext* xfc, const XEnterWindowEvent* event,
 			return FALSE;
 
 		xfc->mouse_active = TRUE;
-
+		/* Rangee Patch for a not too aggressive xfreerdp focusing
 		if (xfc->fullscreen)
 			XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
+		 */
 
 		if (xfc->focused)
 			xf_grab_kbd(xfc);
