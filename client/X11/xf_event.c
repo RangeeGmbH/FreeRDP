@@ -396,11 +396,13 @@ BOOL xf_generic_MotionNotify(xfContext* xfc, int x, int y, int state, Window win
 	xf_event_adjust_coordinates(xfc, &x, &y);
 	freerdp_input_send_mouse_event(input, PTR_FLAGS_MOVE, x, y);
 
-	if (xfc->fullscreen && !app)
-	{
-		XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
-	}
-
+	/**
+	* Rangee Patch for a not too aggressive xfreerdp focusing
+		if (xfc->fullscreen && !app)
+		{
+			XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
+		}
+	*/
 	return TRUE;
 }
 static BOOL xf_event_MotionNotify(xfContext* xfc, const XMotionEvent* event, BOOL app)
@@ -624,9 +626,11 @@ static BOOL xf_event_EnterNotify(xfContext* xfc, const XEnterWindowEvent* event,
 			return FALSE;
 
 		xfc->mouse_active = TRUE;
-
+/*
+* Rangee Patch for a not too aggressive xfreerdp focusing
 		if (xfc->fullscreen)
 			XSetInputFocus(xfc->display, xfc->window->handle, RevertToPointerRoot, CurrentTime);
+*/
 
 		if (xfc->focused)
 			XGrabKeyboard(xfc->display, xfc->window->handle, TRUE, GrabModeAsync, GrabModeAsync,
