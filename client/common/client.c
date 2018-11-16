@@ -749,6 +749,10 @@ BOOL client_auto_reconnect_ex(freerdp* instance, BOOL (*window_events)(freerdp* 
 			/* A network disconnect was detected */
 			WLog_WARN(TAG, "Disconnected by server hitting a bug or resource limit [%s]",
 			          freerdp_get_error_info_string(error));
+
+			/* Force auto-reconnect */
+            settings->AutoReconnectionEnabled = TRUE;
+            maxRetries = 4;
 			break;
 		case ERRINFO_SUCCESS:
 			/* A network disconnect was detected */
