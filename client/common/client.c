@@ -740,17 +740,25 @@ BOOL client_auto_reconnect_ex(freerdp* instance, BOOL (*window_events)(freerdp* 
 	settings = instance->settings;
 	maxRetries = settings->AutoReconnectMaxRetries;
 
-	/* Only auto reconnect on network disconnects. */
-	if (freerdp_error_info(instance) != 0)
-		return FALSE;
-
-	/* A network disconnect was detected */
-	WLog_INFO(TAG, "Network disconnect!");
-
-	if (!settings->AutoReconnectionEnabled)
+	switch (freerdp_error_info(instance))
 	{
-		/* No auto-reconnect - just quit */
-		return FALSE;
+		case 0:
+			/* A network disconnect was detected */
+			WLog_INFO(TAG, "Network disconnect!");
+
+			if (!settings->AutoReconnectionEnabled)
+			{
+				/* No auto-reconnect - just quit */
+				return FALSE;
+			}
+			break;
+		case ERRINFO_GRAPHICS_SUBSYSTEM_FAILED:
+			WLog_INFO(TAG, "Probably hitting bug with 2k16 and 2k12 servers, auto-reconnecting...");
+			if (!maxRetries)
+				maxRetries = 4;
+			break;
+		default:
+			return FALSE;
 	}
 
 	/* Perform an auto-reconnect. */
