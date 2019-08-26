@@ -2692,7 +2692,8 @@ LONG smartcard_irp_device_control_call(SMARTCARD_DEVICE* smartcard, SMARTCARD_OP
 	smartcard_pack_common_type_header(smartcard, irp->output); /* CommonTypeHeader (8 bytes) */
 	smartcard_pack_private_type_header(smartcard, irp->output,
 	                                   objectBufferLength); /* PrivateTypeHeader (8 bytes) */
-	Stream_Write_INT32(irp->output, result);                /* Result (4 bytes) */
+	result = SCARD_S_SUCCESS;
+	Stream_Write_INT32(irp->output, result); /* Result (4 bytes) */
 	Stream_SetPosition(irp->output, Stream_Length(irp->output));
 	return SCARD_S_SUCCESS;
 }
