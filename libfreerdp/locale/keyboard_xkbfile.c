@@ -187,7 +187,7 @@ static const XKB_KEY_NAME_SCANCODE XKB_KEY_NAME_SCANCODE_TABLE[] = {
 	{ "CUT", RDP_SCANCODE_UNKNOWN },              /* 145: CUT [XF86Cut] */
 	{ "HELP", RDP_SCANCODE_HELP },                /* 146: HELP [Help] */
 	{ "I147", RDP_SCANCODE_UNKNOWN },             /* 147: I147 [XF86MenuKB] */
-	{ "I148", RDP_SCANCODE_UNKNOWN },             /* 148: I148 [XF86Calculator] */
+	{ "I148", RDP_SCANCODE_LAUNCH_APP2 },         /* 148: I148 [XF86Calculator] */
 	{ "I149", RDP_SCANCODE_UNKNOWN },             /* 149: I149 [(null)] */
 	{ "I150", RDP_SCANCODE_SLEEP },               /* 150: I150 [XF86Sleep] */
 	{ "I151", RDP_SCANCODE_UNKNOWN },             /* 151: I151 [XF86WakeUp] */
