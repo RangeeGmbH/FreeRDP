@@ -155,10 +155,21 @@ void xf_rail_adjust_position(xfContext* xfc, xfAppWindow* appWindow)
 		 * Calculate new size/position for the rail window(new values for
 		 * windowOffsetX/windowOffsetY/windowWidth/windowHeight) on the server
 		 */
+
+		/*
+		Rangee Quick&Dirty Patch for Problems with Borders arround some RemoteApps like EXCEL/WORD and Co.
+
+		orig:
 		const INT16 left = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginLeft);
 		const INT16 right = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginRight);
 		const INT16 top = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginTop);
 		const INT16 bottom = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginBottom);
+		*/
+
+		INT16 left = 8;
+		INT16 right = 8;
+		INT16 top = 8;
+		INT16 bottom = 8;
 		windowMove.left = WINPR_ASSERTING_INT_CAST(INT16, appWindow->x - left);
 		windowMove.top = WINPR_ASSERTING_INT_CAST(INT16, appWindow->y - top);
 		windowMove.right = WINPR_ASSERTING_INT_CAST(INT16, appWindow->x + appWindow->width + right);
