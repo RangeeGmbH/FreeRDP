@@ -155,15 +155,22 @@ void xf_rail_adjust_position(xfContext* xfc, xfAppWindow* appWindow)
 		 * Calculate new size/position for the rail window(new values for
 		 * windowOffsetX/windowOffsetY/windowWidth/windowHeight) on the server
 		 */
-		const INT16 left = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginLeft);
-		const INT16 right = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginRight);
-		const INT16 top = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginTop);
-		const INT16 bottom = WINPR_ASSERTING_INT_CAST(INT16, appWindow->resizeMarginBottom);
-		windowMove.left = WINPR_ASSERTING_INT_CAST(INT16, appWindow->x - left);
-		windowMove.top = WINPR_ASSERTING_INT_CAST(INT16, appWindow->y - top);
-		windowMove.right = WINPR_ASSERTING_INT_CAST(INT16, appWindow->x + appWindow->width + right);
-		windowMove.bottom =
-		    WINPR_ASSERTING_INT_CAST(INT16, appWindow->y + appWindow->height + bottom);
+
+		/*		
+		Rangee Quick&Dirty Patch for Problems with Borders arround some RemoteApps like EXCEL/WORD and Co.
+               
+		orig:
+		windowMove.left = appWindow->x - appWindow->resizeMarginLeft;
+		windowMove.top = appWindow->y - appWindow->resizeMarginTop;
+		windowMove.right = appWindow->x + appWindow->width + appWindow->resizeMarginRight;
+		windowMove.bottom = appWindow->y + appWindow->height + appWindow->resizeMarginBottom;
+		*/
+		
+		windowMove.left = appWindow->x - 8;
+		windowMove.top = appWindow->y - 8;
+		windowMove.right = appWindow->x + appWindow->width + 8;
+		windowMove.bottom = appWindow->y + appWindow->height + 8;
+	
 		xfc->rail->ClientWindowMove(xfc->rail, &windowMove);
 	}
 }
