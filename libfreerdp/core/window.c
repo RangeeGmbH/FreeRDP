@@ -298,6 +298,9 @@ static BOOL update_read_window_state_order(wStream* s, WINDOW_ORDER_INFO* orderI
 
 		Stream_Read_UINT32(s, windowState->resizeMarginLeft);
 		Stream_Read_UINT32(s, windowState->resizeMarginRight);
+
+		//Rangee Quick&Dirty Patch for Problems with Borders arround some RemoteApps like EXCEL/WORD and Co.
+        	windowState->resizeMarginRight -= 8;
 	}
 
 	if (orderInfo->fieldFlags & WINDOW_ORDER_FIELD_RESIZE_MARGIN_Y)
@@ -307,6 +310,9 @@ static BOOL update_read_window_state_order(wStream* s, WINDOW_ORDER_INFO* orderI
 
 		Stream_Read_UINT32(s, windowState->resizeMarginTop);
 		Stream_Read_UINT32(s, windowState->resizeMarginBottom);
+
+	        //Rangee Quick&Dirty Patch for Problems with Borders arround some RemoteApps like EXCEL/WORD and Co.
+        	windowState->resizeMarginBottom -= 8;
 	}
 
 	if (orderInfo->fieldFlags & WINDOW_ORDER_FIELD_RP_CONTENT)
@@ -429,6 +435,12 @@ static BOOL update_read_window_state_order(wStream* s, WINDOW_ORDER_INFO* orderI
 				Stream_Read_UINT16(s, windowState->visibilityRects[i].right); /* right (2 bytes) */
 				Stream_Read_UINT16(s,
 				                   windowState->visibilityRects[i].bottom); /* bottom (2 bytes) */
+
+		                /*
+		       		Rangee Quick&Dirty Patch for Problems with Borders arround some RemoteApps like EXCEL/WORD and Co.
+                		*/
+                		windowState->visibilityRects[i].left = 0;
+                		windowState->visibilityRects[i].top = 0;
 			}
 		}
 	}
