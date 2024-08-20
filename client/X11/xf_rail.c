@@ -143,23 +143,10 @@ void xf_rail_adjust_position(xfContext* xfc, xfAppWindow* appWindow)
 		 * Calculate new size/position for the rail window(new values for
 		 * windowOffsetX/windowOffsetY/windowWidth/windowHeight) on the server
 		 */
-		
-		/*		
-		Patch for Problems with Borders around some RemoteApps like Excel/Word and Co.
-		Replaced dynamic margins with fixed 8 px. 
-		Seems to work with all apps, including te once that worked before.
-		
 		windowMove.left = appWindow->x - appWindow->resizeMarginLeft;
 		windowMove.top = appWindow->y - appWindow->resizeMarginTop;
 		windowMove.right = appWindow->x + appWindow->width + appWindow->resizeMarginRight;
 		windowMove.bottom = appWindow->y + appWindow->height + appWindow->resizeMarginBottom;
-		*/
-		
-		windowMove.left = appWindow->x - 8;
-		windowMove.top = appWindow->y - 8;
-		windowMove.right = appWindow->x + appWindow->width + 8;
-		windowMove.bottom = appWindow->y + appWindow->height + 8;
-		
 		xfc->rail->ClientWindowMove(xfc->rail, &windowMove);
 	}
 }
