@@ -1670,10 +1670,10 @@ static BOOL rdpdr_state_check(rdpdrPlugin* rdpdr, UINT16 packetid, enum RDPDR_CH
 		va_end(ap);
 
 		WLog_Print(rdpdr->log, WLOG_ERROR,
-		           "channel [RDPDR] received %s, expected states [%s] but have state %s, aborting.",
+		           "channel [RDPDR] received %s, expected states [%s] but have state %s, discarding message.",
 		           rdpdr_packetid_string(packetid), buffer, strstate);
 
-		rdpdr_state_advance(rdpdr, RDPDR_CHANNEL_STATE_INITIAL);
+		//rdpdr_state_advance(rdpdr, RDPDR_CHANNEL_STATE_INITIAL);
 		return FALSE;
 	}
 	return rdpdr_state_advance(rdpdr, next);
