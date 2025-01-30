@@ -371,6 +371,9 @@ BOOL freerdp_settings_get_bool(WINPR_ATTR_UNUSED const rdpSettings* settings,
 		case FreeRDP_MaximizeShell:
 			return settings->MaximizeShell;
 
+		case FreeRDP_MinimizeHotkey:
+			return settings->MinimizeHotkey;
+
 		case FreeRDP_MouseAttached:
 			return settings->MouseAttached;
 
@@ -1087,6 +1090,10 @@ BOOL freerdp_settings_set_bool(WINPR_ATTR_UNUSED rdpSettings* settings,
 
 		case FreeRDP_MaximizeShell:
 			settings->MaximizeShell = cnv.c;
+			break;
+
+		case FreeRDP_MinimizeHotkey:
+			settings->MinimizeHotkey = cnv.c;
 			break;
 
 		case FreeRDP_MouseAttached:
