@@ -172,7 +172,7 @@ static const struct x11_key_scancode_t XKB_KEY_NAME_SCANCODE_TABLE[] = {
 	{ "I128", RDP_SCANCODE_LAUNCH_MEDIA_SELECT }, /* 128: I128 [XF86LaunchA] */
 	{ "I129", RDP_SCANCODE_ABNT_C2 },             /* 129: I129 [KP_Decimal] */
 	{ "I147", RDP_SCANCODE_UNKNOWN },             /* 147: I147 [XF86MenuKB] */
-	{ "I148", RDP_SCANCODE_UNKNOWN },             /* 148: I148 [XF86Calculator] */
+	{ "I148", RDP_SCANCODE_LAUNCH_APP2 },             /* 148: I148 [XF86Calculator] */
 	{ "I149", RDP_SCANCODE_UNKNOWN },             /* 149: I149 [(null)] */
 	{ "I150", RDP_SCANCODE_SLEEP },               /* 150: I150 [XF86Sleep] */
 	{ "I151", RDP_SCANCODE_UNKNOWN },             /* 151: I151 [XF86WakeUp] */
