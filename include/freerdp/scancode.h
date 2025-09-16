@@ -231,7 +231,7 @@
 #define RDP_SCANCODE_LAUNCH_MEDIA_SELECT                                                 \
 	MAKE_RDP_SCANCODE(0x6D, TRUE)                              /* VK_LAUNCH_MEDIA_SELECT \
 	                                                            */
-#define RDP_SCANCODE_LAUNCH_APP1 MAKE_RDP_SCANCODE(0x6E, TRUE) /* VK_LAUNCH_APP1 */
-#define RDP_SCANCODE_LAUNCH_APP2 MAKE_RDP_SCANCODE(0x6F, TRUE) /* VK_LAUNCH_APP2 */
+#define RDP_SCANCODE_LAUNCH_APP1 MAKE_RDP_SCANCODE(0x6B, TRUE) /* VK_LAUNCH_APP1 */
+#define RDP_SCANCODE_LAUNCH_APP2 MAKE_RDP_SCANCODE(0x21, TRUE) /* VK_LAUNCH_APP2 */
 
 #endif /* FREERDP_LOCALE_KEYBOARD_RDP_SCANCODE_H */
