@@ -1089,10 +1089,11 @@ BOOL xf_keyboard_handle_special_keys(xfContext* xfc, KeySym keysym)
 			case XK_d:
 			case XK_D:
 				/* <ctrl>+<alt>+d: disconnect session */
-				WLog_INFO(TAG, "<ctrl>+<alt>+d pressed, terminating RDP session...");
-				xf_sync_kbd_state(xfc);
-				return freerdp_abort_connect_context(&xfc->common.context);
-
+				if(freerdp_settings_get_bool(xfc->common.context.settings, FreeRDP_EndSessionHotkey)) {
+                    WLog_INFO(TAG, "<ctrl>+<alt>+d pressed, terminating RDP session...");
+                    xf_sync_kbd_state(xfc);
+                    return freerdp_abort_connect_context(&xfc->common.context);
+                }
 			default:
 				break;
 		}
