@@ -211,6 +211,9 @@ BOOL freerdp_settings_get_bool(WINPR_ATTR_UNUSED const rdpSettings* settings,
 		case FreeRDP_EncomspVirtualChannel:
 			return settings->EncomspVirtualChannel;
 
+		case FreeRDP_EndSessionHotkey:
+			return settings->EndSessionHotkey;
+
 		case FreeRDP_ExtSecurity:
 			return settings->ExtSecurity;
 
@@ -873,6 +876,10 @@ BOOL freerdp_settings_set_bool(WINPR_ATTR_UNUSED rdpSettings* settings,
 
 		case FreeRDP_EncomspVirtualChannel:
 			settings->EncomspVirtualChannel = cnv.c;
+			break;
+
+		case FreeRDP_EndSessionHotkey:
+			settings->EndSessionHotkey = cnv.c;
 			break;
 
 		case FreeRDP_ExtSecurity:
