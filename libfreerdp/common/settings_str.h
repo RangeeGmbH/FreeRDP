@@ -155,6 +155,7 @@ static const struct settings_str_entry settings_map[] = {
 	{ FreeRDP_LyncRdpMode, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_LyncRdpMode" },
 	{ FreeRDP_MaximizeShell, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_MaximizeShell" },
 	{ FreeRDP_MinimizeHotkey, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_MinimizeHotkey" },
+	{ FreeRDP_EndSessionHotkey, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_EndSessionHotkey" },
 	{ FreeRDP_MouseAttached, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_MouseAttached" },
 	{ FreeRDP_MouseHasWheel, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_MouseHasWheel" },
 	{ FreeRDP_MouseMotion, FREERDP_SETTINGS_TYPE_BOOL, "FreeRDP_MouseMotion" },

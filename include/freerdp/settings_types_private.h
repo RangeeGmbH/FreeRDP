@@ -860,6 +860,7 @@ struct rdp_settings
 	 */
 
 	SETTINGS_DEPRECATED(ALIGN64 BOOL MinimizeHotkey);          /* 6000 */
+	SETTINGS_DEPRECATED(ALIGN64 BOOL EndSessionHotkey);        /* 6001 */
 };
 
 #ifdef __cplusplus
