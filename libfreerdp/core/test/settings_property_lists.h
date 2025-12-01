@@ -54,6 +54,7 @@ static const size_t bool_list_indices[] = {
 	FreeRDP_EmbeddedWindow,
 	FreeRDP_EnableWindowsKey,
 	FreeRDP_EncomspVirtualChannel,
+	FreeRDP_EndSessionHotkey,
 	FreeRDP_ExtSecurity,
 	FreeRDP_ExternalCertificateManagement,
 	FreeRDP_FIPSMode,
