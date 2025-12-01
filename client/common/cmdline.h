@@ -514,6 +514,8 @@ static const COMMAND_LINE_ARGUMENT_A global_cmd_args[] = {
 	  "Alt+Ctrl+Enter to toggle fullscreen" },
 	{ "minimize-hotkey", COMMAND_LINE_VALUE_BOOL, nullptr, BoolValueTrue, nullptr, -1, nullptr,
 	  "Alt+Ctrl+M to minimize application" },
+        { "endsession-hotkey", COMMAND_LINE_VALUE_BOOL, nullptr, BoolValueTrue, nullptr, -1, nullptr,
+          "Alt+Ctrl+D to end session" },
 	{ "tune", COMMAND_LINE_VALUE_REQUIRED, "<setting:value>,<setting:value>", "", nullptr, -1,
 	  nullptr, "[experimental] directly manipulate freerdp settings, use with extreme caution!" },
 #if defined(WITH_FREERDP_DEPRECATED_COMMANDLINE)
