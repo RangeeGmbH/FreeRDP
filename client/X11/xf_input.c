@@ -755,10 +755,22 @@ int xf_input_event(xfContext* xfc, WINPR_ATTR_UNUSED const XEvent* xevent, XIDev
 	WINPR_ASSERT(xevent);
 	WINPR_ASSERT(event);
 
+    /*
+     * When not running RAILS and not using Relative Mouse only
+     * care about events for this window. Filter out anything else,
+     * like floatbar window events
+     */
+	const Window w = xevent->xany.window;
+
 	xfWindow* window = xfc->window;
 	if (window)
 	{
-		if (xf_floatbar_is_locked(window->floatbar))
+        if (w != window->handle)
+        {
+            if (!xfc->remote_app && !xf_use_rel_mouse(xfc))
+                return 0;
+        }
+        if (xf_floatbar_is_locked(window->floatbar))
 			return 0;
 	}
 
